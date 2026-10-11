@@ -386,6 +386,15 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
   display: flex; justify-content: flex-end;
 }
 .tilt { transition: transform 0.18s ease, border-color 0.22s ease, box-shadow 0.22s ease; will-change: transform; }
+
+/* ---------- Échec d'étape + téléchargements ---------- */
+.kit-card[data-state="error"] { opacity: 1; border-color: rgba(251, 191, 36, 0.5); }
+.kit-card[data-state="error"] .kit-badge { color: var(--amber); background: rgba(251, 191, 36, 0.12); }
+.img-actions { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+.btn-mini.kit-dl, .btn-mini.kit-retry {
+  background: var(--grad-1); color: #041018; border: none;
+}
+.btn-mini.kit-dl:hover, .btn-mini.kit-retry:hover { filter: brightness(1.12); transform: translateY(-1px); }
 .result-body pre {
   background: rgba(0, 0, 0, 0.35); border: 1px solid var(--stroke); border-radius: 12px;
   padding: 14px 16px; overflow-x: auto; font-size: 0.88rem; color: var(--text-1); white-space: pre-wrap;
@@ -708,6 +717,7 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
         <button class="chip" data-cmd="Relancer un client en retard de paiement de 30 jours, ferme mais diplomate">✉️ Kit Mail difficile</button>
         <button class="chip" data-cmd="Organiser ma semaine : 3 projets en parallèle, 5 réunions, échéance vendredi">📅 Kit Semaine</button>
         <button class="chip" data-cmd="Annoncer à mon équipe un changement d'organisation et les rassurer">📣 Kit Annonce</button>
+        <button class="chip" data-cmd="Créer un pack complet d'assets 2D pixel art pour un shoot them up à scrolling horizontal (vaisseau, ennemis, décor, bonus)">🎮 Kit Assets JV</button>
       </div>
 
       <div class="result-panel glass" id="result-panel" hidden>
@@ -972,10 +982,21 @@ const ART_STYLES = {
     label: "🌸 Aquarelle",
     suffix: "delicate watercolor painting, soft pastel palette, paper texture, artistic brush strokes, elegant composition",
   },
+  pixel: {
+    label: "👾 Pixel art",
+    suffix: "2D pixel art game asset, crisp clean pixels, strong silhouette, vibrant limited palette, isolated on plain flat background, game sprite quality, no text",
+  },
+  game2d: {
+    label: "🎮 Art 2D jeu vidéo",
+    suffix: "2D game asset art, clean bold shapes, vibrant colors, side-scroller game style, isolated on plain flat background, game ready asset, no text",
+  },
 };
 
 function pickStyle(text) {
   const t = (text || "").toLowerCase();
+  if (/pixel|sprite|assets|asset|tileset|shmup|shoot|jeu vidéo|jeu video|game|scroller/.test(t)) {
+    return /pixel/.test(t) ? "pixel" : "game2d";
+  }
   if (/futur|sci-?fi|cyber|néon|neon|espace|robot|ville.*demain/.test(t)) return "scifi";
   if (/photo|réaliste|realiste|portrait/.test(t)) return "photo";
   if (/anime|manga|ghibli/.test(t)) return "anime";
@@ -1017,6 +1038,13 @@ async function artDirection(userText) {
 function buildImagePrompt(userText, styleKey, artDir) {
   const style = ART_STYLES[styleKey] || ART_STYLES.cine;
   return (artDir || localArtPrompt(userText)) + ", " + style.suffix;
+}
+
+// Direction artistique mémorisée : tous les assets d'un kit partagent la même identité visuelle
+const DIR_MEMO = {};
+function dirFor(mission) {
+  if (!DIR_MEMO[mission]) DIR_MEMO[mission] = artDirection("2D video game asset pack, consistent art style: " + mission);
+  return DIR_MEMO[mission];
 }
 
 async function fetchWithTimeout(url, opts, ms) {
@@ -1547,6 +1575,7 @@ if (soundToggle) {
 }
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+const KIT_RETRY = {};
 
 /* ============================================================
    GÉNÉRATEUR DE KITS — une mission → N livrables en orchestre
@@ -1627,6 +1656,39 @@ const KITS = [
     ],
   },
   {
+    key: "assetsjv", icon: "🎮", title: "Kit Assets Jeu Vidéo",
+    match: ["assets", "asset", "sprite", "sprites", "pixel", "tileset", "shmup", "shoot", "shooter", "scroller", "jeu vidéo", "jeu video", "game", "métroidvania", "metroidvania", "plateforme", "rpg", "vaisseau", "ennemi", "ennemis", "boss", "bonus", "power-up", "powerup"],
+    build: (m) => {
+      const styleKey = pickStyle(m);
+      const imgStep = (icon, label, desc, size) => ({
+        icon, label,
+        run: async () => {
+          const dir = await dirFor(m);
+          const prompt = buildImagePrompt(desc + ". Art direction: " + dir, styleKey, desc + ". Art direction: " + dir);
+          const u = await AI.image(prompt, size);
+          return { html: imgLivre(u, label) };
+        },
+      });
+      return [
+        {
+          icon: "🧠", label: "Direction artistique",
+          run: async () => {
+            const dir = await dirFor(m);
+            return { html: "<p><em>« " + esc(dir) + " »</em></p><p>Style : <strong>" + esc(ART_STYLES[styleKey].label) + "</strong> — identique pour tout le pack.</p>" };
+          },
+        },
+        imgStep("🚀", "Héros / vaisseau joueur", "hero player spaceship or character, front view, strong readable silhouette, isolated on plain flat background, game sprite", { w: 1024, h: 1024 }),
+        imgStep("👾", "Ennemis — 3 variantes", "three distinct enemy types side by side, varied silhouettes, isolated on plain flat background, game sprites", { w: 1280, h: 720 }),
+        imgStep("🌌", "Décor / arrière-plan", "wide parallax scrolling background layer, side-scrolling game environment, clear depth layers, no character", { w: 1280, h: 720 }),
+        imgStep("👹", "Boss", "large intimidating boss enemy, impressive silhouette, isolated on plain flat background, game sprite", { w: 1024, h: 1024 }),
+        imgStep("🎁", "Bonus & power-ups", "set of colorful power-up items and bonus pickups arranged neatly, isolated on plain flat background, game sprites", { w: 1024, h: 1024 }),
+        imgStep("🕹️", "Interface / HUD", "game HUD interface elements: health bar, score panel, icons, buttons, clean readable design on plain flat background", { w: 1280, h: 720 }),
+        { icon: "📘", label: "Guide d'intégration", fallback: "planner", prompt: K(m, "Rédige un guide d'intégration des visuels dans l'outil de jeu cité dans la mission : formats de fichiers, dimensions recommandées, découpe des sprites, nomenclature, astuces d'import.") },
+        { icon: "✅", label: "Checklist du pack", fallback: "ideas", prompt: K(m, "Liste TOUS les assets restant à produire pour finir le jeu (dimensions + rôle de chacun), en plus des visuels déjà générés ici.") },
+      ];
+    },
+  },
+  {
     key: "polyvalent", icon: "🧠", title: "Kit Mission Complète",
     match: [],
     build: (m) => [
@@ -1635,6 +1697,15 @@ const KITS = [
       { icon: "✉️", label: "Message clé", fallback: "writer", prompt: K(m, "Rédige le message principal à envoyer pour faire avancer cette mission (ton professionnel).") },
       { icon: "💡", label: "5 idées actionnables", fallback: "ideas", prompt: K(m, "Propose 5 idées actionnables et créatives pour réussir cette mission.") },
       { icon: "✅", label: "Prochaine étape", fallback: "planner", prompt: K(m, "Quelle est la toute première action à faire dans les 24h ? Découpe-la précisément.") },
+      {
+        icon: "🎨", label: "Visuel de couverture",
+        run: async () => {
+          const dir = await dirFor(m);
+          const prompt = buildImagePrompt(dir, pickStyle(m), dir);
+          const u = await AI.image(prompt, { w: 1280, h: 720 });
+          return { html: imgLivre(u, "Visuel de couverture") };
+        },
+      },
     ],
   },
 ];
@@ -1692,13 +1763,13 @@ async function runKitBoard(kit, cmd, steps) {
     "</div>";
 
   let done = 0;
-  await Promise.all(steps.map((s, i) => (async () => {
-    await sleep(i * 350); // léger décalage : respecte les limites des IA gratuites
+  const execStep = async (i, s) => {
     const card = document.getElementById("kit-card-" + i);
     const badge = document.getElementById("kit-badge-" + i);
     if (card) card.dataset.state = "running";
     if (badge) badge.textContent = "génération…";
     let html = "";
+    let ok = true;
     try {
       if (s.run) {
         const res = await s.run();
@@ -1708,18 +1779,25 @@ async function runKitBoard(kit, cmd, steps) {
         html = mdToHtml(answer);
       }
     } catch (e) {
-      html = '<div class="result-note">⚠️ Livrable temporairement indisponible — relancez la mission.</div>';
+      ok = false;
+      html = '<div class="result-note">⚠️ Livrable temporairement indisponible (service gratuit saturé).</div>' +
+        '<p><button class="btn-mini kit-retry" data-idx="' + i + '">↻ Relancer cette étape</button></p>';
     }
     const body = document.getElementById("kit-card-body-" + i);
     if (body) body.innerHTML = html;
-    if (card) card.dataset.state = "done";
-    if (badge) badge.textContent = "✓ prêt";
+    if (card) card.dataset.state = ok ? "done" : "error";
+    if (badge) badge.textContent = ok ? "✓ prêt" : "⚠️ à relancer";
+    KIT_RETRY[i] = () => execStep(i, s);
     done++;
     const p = document.getElementById("kit-progress");
     if (p) p.textContent = done + " / " + steps.length;
     const fill = document.getElementById("kit-progress-fill");
     if (fill && fill.style) fill.style.width = Math.round((done / steps.length) * 100) + "%";
     if (done < steps.length) SFX.blip();
+  };
+  await Promise.all(steps.map((s, i) => (async () => {
+    await sleep(i * 450); // léger décalage : respecte les limites des IA gratuites
+    await execStep(i, s);
   })()));
 
   clearInterval(timer);
@@ -1738,8 +1816,32 @@ async function runKit(kit, cmd) {
 function imgLivre(url, label) {
   return (
     '<p><img src="' + esc(url) + '" alt="' + esc(label) + '" /></p>' +
-    '<p><a href="' + esc(url) + '" target="_blank" rel="noopener">🔗 ' + esc(label) + " — grand format</a></p>"
+    '<p class="img-actions">' +
+      '<button class="btn-mini kit-dl" data-url="' + esc(url) + '" data-name="' + esc(label) + '">📥 Télécharger le PNG</button>' +
+      '<a class="btn-mini" href="' + esc(url) + '" target="_blank" rel="noopener">🔗 Ouvrir en grand</a>' +
+    "</p>"
   );
+}
+
+// Téléchargement réel du PNG (Blob) — repli : ouverture dans un nouvel onglet
+async function downloadImage(url, name) {
+  try {
+    const r = await fetch(url, { mode: "cors" });
+    if (!r.ok) throw new Error("http-" + r.status);
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (name || "synapse").toLowerCase().replace(/[^a-z0-9àâçéèêëîïôûùüÿñæœ]+/gi, "-") + ".png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    SFX.click();
+    toast("📥 Téléchargement lancé ✓");
+  } catch {
+    window.open(url, "_blank", "noopener");
+    toast("Image ouverte — appui long pour l'enregistrer");
+  }
 }
 
 async function runVisualKit(cmd) {
@@ -1789,10 +1891,13 @@ async function executeCommand(text) {
   commandRun.disabled = true;
   SFX.launch();
   try {
-    if (detectIntent(cmd).id === "visual") {
+    const kit = detectKit(cmd);
+    if (kit.key !== "polyvalent") {
+      await runKit(kit, cmd);
+    } else if (detectIntent(cmd).id === "visual") {
       await runVisualKit(cmd);
     } else {
-      await runKit(detectKit(cmd), cmd);
+      await runKit(kit, cmd);
     }
   } catch (e) {
     console.warn(e);
@@ -1806,6 +1911,8 @@ async function executeCommand(text) {
 resultBody.addEventListener("click", async (e) => {
   const copyOne = e.target.closest(".kit-copy");
   const copyAll = e.target.closest("#kit-copy-all");
+  const dl = e.target.closest(".kit-dl");
+  const retry = e.target.closest(".kit-retry");
   if (copyOne) {
     const body = document.getElementById("kit-card-body-" + copyOne.dataset.idx);
     try { await navigator.clipboard.writeText(body.innerText); SFX.click(); toast("Livrable copié ✓"); }
@@ -1817,6 +1924,11 @@ resultBody.addEventListener("click", async (e) => {
       SFX.click();
       toast("Kit complet copié ✓");
     } catch { toast("Copie impossible dans ce contexte"); }
+  } else if (dl) {
+    downloadImage(dl.dataset.url, dl.dataset.name);
+  } else if (retry) {
+    const fn = KIT_RETRY[retry.dataset.idx];
+    if (fn) { SFX.click(); toast("Relance de l'étape…"); fn(); }
   }
 });
 
@@ -2215,5 +2327,5 @@ document.getElementById("chaines").addEventListener("click", async (e) => {
 });
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a48e9c9f9acea0cb',t:'MTc5MTcyOTU0MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a48eb8448e982068',t:'MTc5MTczMDY3Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
