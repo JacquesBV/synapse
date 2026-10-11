@@ -292,6 +292,100 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
 .result-body strong { color: var(--text-0); }
 .result-body a { color: var(--cyan); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .result-body img { display: block; margin: 10px 0; }
+
+/* ---------- Galerie de variations ---------- */
+.variations { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 14px 0; }
+.var-card {
+  margin: 0; border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--stroke); background: rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.var-card:hover { transform: translateY(-4px); border-color: var(--stroke-hot); }
+.var-card img { width: 100%; display: block; margin: 0; aspect-ratio: 16 / 9; object-fit: cover; }
+.var-card figcaption { padding: 11px 14px; font-size: 0.83rem; }
+
+/* ---------- Kit board (mission control) ---------- */
+.sound-toggle { font-size: 1rem; padding: 8px 12px; line-height: 1; }
+.kit-hud {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 18px 20px; border-radius: 16px; margin-bottom: 12px;
+  background: linear-gradient(115deg, rgba(34, 211, 238, 0.12), rgba(168, 85, 247, 0.12));
+  border: 1px solid var(--stroke-hot);
+}
+.kit-hud-left { display: flex; align-items: center; gap: 15px; }
+.kit-icon-big { font-size: 2.3rem; filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.5)); }
+.kit-title { font-size: 1.18rem; margin-bottom: 2px; }
+.kit-mission { color: var(--text-1); font-size: 0.87rem; max-width: 54ch; }
+.kit-hud-right { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+.hud-stat { text-align: center; }
+.hud-label {
+  display: block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-2); margin-bottom: 2px;
+}
+.hud-stat strong {
+  font-family: var(--font-display); font-size: 1.45rem;
+  background: var(--grad-1); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.kit-progress-bar {
+  height: 6px; border-radius: 99px; background: rgba(255, 255, 255, 0.08);
+  overflow: hidden; margin-bottom: 18px;
+}
+.kit-progress-fill {
+  height: 100%; width: 0; background: var(--grad-1);
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.8);
+  transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.kit-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); gap: 16px;
+}
+.kit-card {
+  position: relative; overflow: hidden; display: flex; flex-direction: column;
+  border-radius: 16px; border: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.04);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+}
+.kit-card[data-state="pending"] { opacity: 0.75; }
+.kit-card[data-state="running"] {
+  opacity: 1; border-color: rgba(34, 211, 238, 0.6);
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.22);
+  transform: translateY(-3px);
+}
+.kit-card[data-state="running"]::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 32%, rgba(34, 211, 238, 0.16) 50%, transparent 68%);
+  animation: scan 1.5s linear infinite;
+}
+@keyframes scan { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.kit-card[data-state="done"] {
+  opacity: 1; border-color: rgba(52, 211, 153, 0.45);
+  box-shadow: 0 0 22px rgba(52, 211, 153, 0.12);
+}
+.kit-card-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 15px; border-bottom: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.025);
+}
+.kit-card-ico { font-size: 1.15rem; }
+.kit-card-head h4 { font-size: 0.93rem; flex: 1; font-family: var(--font-body); font-weight: 700; }
+.kit-badge {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 4px 11px; border-radius: 999px; white-space: nowrap;
+  background: rgba(255, 255, 255, 0.07); color: var(--text-2);
+}
+.kit-card[data-state="running"] .kit-badge { color: var(--cyan); background: rgba(34, 211, 238, 0.13); }
+.kit-card[data-state="done"] .kit-badge { color: var(--green); background: rgba(52, 211, 153, 0.13); }
+.kit-card-body {
+  padding: 14px 16px; flex: 1; font-size: 0.875rem;
+  max-height: 330px; overflow-y: auto;
+}
+.kit-card-body .mz-loader { justify-content: center; padding: 22px 0; }
+.kit-card-body p { font-size: 0.875rem; }
+.kit-card-foot {
+  padding: 10px 14px; border-top: 1px solid var(--stroke);
+  display: flex; justify-content: flex-end;
+}
+.tilt { transition: transform 0.18s ease, border-color 0.22s ease, box-shadow 0.22s ease; will-change: transform; }
 .result-body pre {
   background: rgba(0, 0, 0, 0.35); border: 1px solid var(--stroke); border-radius: 12px;
   padding: 14px 16px; overflow-x: auto; font-size: 0.88rem; color: var(--text-1); white-space: pre-wrap;
@@ -515,12 +609,13 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
       <span class="brand-name">SYNAPSE</span>
     </a>
     <nav class="nav-links" aria-label="Navigation principale">
-      <a href="#cockpit">Cockpit</a>
-      <a href="#modules">Modules</a>
+      <a href="#kits">Kits</a>
+      <a href="#modules">Outils</a>
       <a href="#chaines">Chaînes IA</a>
       <a href="#methode">Méthode</a>
     </nav>
-    <a class="btn btn-primary btn-sm" href="#cockpit">Ouvrir le cockpit</a>
+    <button class="btn-mini sound-toggle" id="sound-toggle" title="Sons d'interface" aria-label="Activer ou couper les sons">🔊</button>
+    <a class="btn btn-primary btn-sm" href="#kits">Générer un kit</a>
     <button class="nav-burger" id="nav-burger" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -530,29 +625,29 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
     <!-- ====== Hero ====== -->
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="pulse-dot"></span> Cockpit IA · 100 % gratuit · Sans compte</p>
+        <p class="eyebrow"><span class="pulse-dot"></span> Générateur de kits IA · 100 % gratuit · Sans compte</p>
         <h1 class="hero-title">
-          Toutes les <span class="grad-text">IA gratuites</span>.<br />
-          Un seul cockpit.<br />
-          <span class="grad-text-alt">Pour votre quotidien.</span>
+          Une mission.<br />
+          <span class="grad-text">Un kit complet.</span><br />
+          <span class="grad-text-alt">Zéro corvée.</span>
         </h1>
         <p class="hero-sub">
-          SYNAPSE combine les meilleures IA gratuites du moment en une interface futuriste :
-          planifiez votre journée, rédigez sans effort, créez des visuels et enchaînez les
-          automatismes — sans abonnement, sans friction, sans compétences techniques.
+          SYNAPSE orchestre plusieurs IA gratuites en parallèle et transforme une simple phrase en
+          <strong>kit de livrables prêts à envoyer</strong> : ordre du jour, mails, plans d'action,
+          rapports, visuels. Vous décrivez la mission — le kit se construit sous vos yeux.
         </p>
         <div class="hero-cta">
-          <a class="btn btn-primary" href="#cockpit">
+          <a class="btn btn-primary" href="#kits">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-            Lancer une commande
+            Générer mon premier kit
           </a>
-          <a class="btn btn-ghost" href="#chaines">Explorer les chaînes IA</a>
+          <a class="btn btn-ghost" href="#modules">Explorer les outils</a>
         </div>
         <ul class="hero-stats" aria-label="Chiffres clés">
-          <li><strong>0&nbsp;€</strong><span>par mois</span></li>
-          <li><strong>4+</strong><span>IA combinées</span></li>
-          <li><strong>1</strong><span>seul écran</span></li>
-          <li><strong>∞</strong><span>possibilités</span></li>
+          <li><strong>1</strong><span>commande</span></li>
+          <li><strong>5+</strong><span>livrables</span></li>
+          <li><strong>~30 s</strong><span>chrono</span></li>
+          <li><strong>0 €</strong><span>par mois</span></li>
         </ul>
       </div>
       <div class="hero-visual" aria-hidden="true">
@@ -564,10 +659,10 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
           <div class="hero-terminal" id="hero-terminal">
             <p class="t-line"><span class="t-prompt">›</span> <span id="typewriter"></span><span class="caret">▌</span></p>
             <div class="t-out">
-              <div class="t-chip">✓ Priorités identifiées</div>
-              <div class="t-chip">✓ Planning optimisé</div>
-              <div class="t-chip">✓ Messages rédigés</div>
-              <div class="t-chip">✓ Visuel généré</div>
+              <div class="t-chip">✓ 5 livrables générés</div>
+              <div class="t-chip">✓ Prêts à envoyer</div>
+              <div class="t-chip">✓ 0 € dépensé</div>
+              <div class="t-chip">✓ 31 s chrono</div>
             </div>
           </div>
           <div class="hero-panel-foot">
@@ -578,13 +673,14 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
     </section>
 
     <!-- ====== Cockpit / Commande universelle ====== -->
-    <section class="section" id="cockpit">
+    <section class="section" id="kits">
       <div class="section-head">
-        <p class="eyebrow">Commande universelle</p>
-        <h2>Un champ. Toutes les IA. <span class="grad-text">Zéro friction.</span></h2>
+        <p class="eyebrow">Lanceur de kits</p>
+        <h2>Décrivez la mission. <span class="grad-text">Le kit se construit tout seul.</span></h2>
         <p class="section-sub">
-          Dites ce dont vous avez besoin en français courant. SYNAPSE comprend votre intention,
-          choisit le bon moteur IA gratuit, et enchaîne les étapes si besoin. Essayez un exemple :
+          Une seule phrase suffit. SYNAPSE mobilise plusieurs IA en parallèle et assemble un kit complet
+          de livrables prêts à envoyer — pendant que vous regardez la mission se dérouler en direct.
+          Spécial monde professionnel : réunions, rapports, mails, projets, annonces.
         </p>
       </div>
 
@@ -597,21 +693,21 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
           id="command-input"
           type="text"
           autocomplete="off"
-          placeholder="Ex. : Planifie ma journée : 3 réunions, rédiger un rapport, aller courir à 18h…"
-          aria-label="Commande IA"
+          placeholder="Ex. : Préparer ma réunion d'équipe de demain : bilan trimestriel et objectifs Q4…"
+          aria-label="Mission à transformer en kit"
         />
         <button class="btn btn-primary" id="command-run">
-          Exécuter
+          Lancer la mission
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
 
-      <div class="chips" id="example-chips" aria-label="Exemples de commandes">
-        <button class="chip" data-cmd="Planifie ma journée : 2 réunions, rédiger un dossier, 1h de sport à 18h">📅 Planifier ma journée</button>
-        <button class="chip" data-cmd="Rédige un mail professionnel de relance, poli mais ferme, pour un client en retard de paiement">✉️ Rédiger un mail</button>
-        <button class="chip" data-cmd="Donne-moi 10 idées de contenu sur le thème de la productivité sans stress">💡 Trouver des idées</button>
-        <button class="chip" data-cmd="Résume ce texte : [collez votre texte ici] en 5 points clés">📝 Résumer un texte</button>
-        <button class="chip" data-cmd="Crée un visuel futuriste d'une ville solaire de demain">🎨 Créer un visuel</button>
+      <div class="chips" id="example-chips" aria-label="Exemples de missions">
+        <button class="chip" data-cmd="Préparer ma réunion d'équipe de demain : bilan trimestriel et objectifs Q4">🎯 Kit Réunion</button>
+        <button class="chip" data-cmd="Rédiger mon rapport d'activité trimestriel pour la direction">📊 Kit Rapport</button>
+        <button class="chip" data-cmd="Relancer un client en retard de paiement de 30 jours, ferme mais diplomate">✉️ Kit Mail difficile</button>
+        <button class="chip" data-cmd="Organiser ma semaine : 3 projets en parallèle, 5 réunions, échéance vendredi">📅 Kit Semaine</button>
+        <button class="chip" data-cmd="Annoncer à mon équipe un changement d'organisation et les rassurer">📣 Kit Annonce</button>
       </div>
 
       <div class="result-panel glass" id="result-panel" hidden>
@@ -632,11 +728,11 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
     <!-- ====== Modules ====== -->
     <section class="section" id="modules">
       <div class="section-head">
-        <p class="eyebrow">Modules</p>
-        <h2>Vos outils IA <span class="grad-text">préférés</span>, réunis et harmonisés</h2>
+        <p class="eyebrow">Outils rapides</p>
+        <h2>Besoin d'un coup de main précis ? <span class="grad-text">Un outil, une réponse.</span></h2>
         <p class="section-sub">
-          Chaque module combine un ou plusieurs moteurs IA gratuits derrière une interface unique.
-          Aucun compte, aucune donnée envoyée ailleurs que vers les moteurs IA choisis.
+          En dehors des kits, chaque outil unitaire reste disponible pour agir vite :
+          un module = une compétence IA gratuite, sans compte, sans friction.
         </p>
       </div>
 
@@ -741,32 +837,32 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
     <section class="section" id="methode">
       <div class="section-head">
         <p class="eyebrow">Méthode</p>
-        <h2>Simple à l'extérieur, <span class="grad-text">puissant</span> en dessous</h2>
+        <h2>Simple à l'extérieur, <span class="grad-text">orchestre d'IA</span> en dessous</h2>
       </div>
       <div class="method-grid">
         <div class="method-card glass">
           <div class="method-num">01</div>
-          <h3>Vous demandez</h3>
-          <p>En français, comme à un collègue. Pas de prompt technique, pas de jargon.</p>
+          <h3>Vous décrivez la mission</h3>
+          <p>Une phrase en français courant. Pas de prompt technique, pas de jargon, pas de formation.</p>
         </div>
         <div class="method-card glass">
           <div class="method-num">02</div>
-          <h3>SYNAPSE orchestre</h3>
-          <p>Le site choisit les moteurs IA gratuits les plus adaptés et enchaîne les étapes pour vous.</p>
+          <h3>L'orchestre IA construit le kit</h3>
+          <p>Plusieurs IA gratuites travaillent en parallèle, chacune sur un livrable. Vous suivez tout en direct.</p>
         </div>
         <div class="method-card glass">
           <div class="method-num">03</div>
-          <h3>Vous avancez</h3>
-          <p>Résultat prêt à l'emploi : copiez, envoyez, publiez. Le travail pénible a disparu.</p>
+          <h3>Vous récupérez, prêt à envoyer</h3>
+          <p>5 livrables, bouton copier, zéro retouche obligatoire. La corvée a disparu.</p>
         </div>
       </div>
       <div class="why glass">
         <h3>Pourquoi c'est différent de tout le reste</h3>
         <ul class="why-list">
+          <li><strong>Des kits, pas des outils isolés</strong> — une commande produit un ensemble cohérent de livrables, pas une réponse de plus.</li>
           <li><strong>Gratuit pour de vrai</strong> — aucun compte, aucune carte bancaire, aucune limite artificielle.</li>
-          <li><strong>Combinatoire, pas empilement</strong> — les outils se parlent entre eux via des chaînes, au lieu d'être des onglets isolés.</li>
-          <li><strong>Pensé pour l'humain</strong> — une seule commande, un langage naturel, zéro formation.</li>
-          <li><strong>Open source</strong> — le code est sur GitHub : hébergez-le, modifiez-le, partagez-le.</li>
+          <li><strong>Pensé pour le monde professionnel</strong> — réunions, rapports, mails difficiles, projets, annonces : les vraies corvées des cadres.</li>
+          <li><strong>Interface vivante</strong> — mission control, sons, animations : travailler devient une expérience, pas une corvée.</li>
         </ul>
       </div>
     </section>
@@ -774,9 +870,9 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
     <!-- ====== CTA final ====== -->
     <section class="section cta-final">
       <div class="cta-box glass">
-        <h2>Prêt à reprendre le contrôle<br /><span class="grad-text">de votre temps ?</span></h2>
-        <p>Le cockpit est déjà là, en bas de page. Votre première commande prend 5 secondes.</p>
-        <a class="btn btn-primary btn-lg" href="#cockpit">Ouvrir le cockpit maintenant</a>
+        <h2>Votre prochaine corvée<br /><span class="grad-text">devient un kit de 30 secondes.</span></h2>
+        <p>Le lanceur est juste en haut. Une phrase suffit pour tout obtenir.</p>
+        <a class="btn btn-primary btn-lg" href="#kits">Lancer ma première mission</a>
       </div>
     </section>
   </main>
@@ -791,8 +887,8 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
       </div>
       <div>
         <h4>Explorer</h4>
-        <a href="#cockpit">Cockpit</a>
-        <a href="#modules">Modules</a>
+        <a href="#kits">Kits</a>
+        <a href="#modules">Outils</a>
         <a href="#chaines">Chaînes IA</a>
         <a href="#methode">Méthode</a>
       </div>
@@ -832,12 +928,96 @@ const AI = {
       return r.text();
     });
   },
-  imageURL: (prompt) =>
-    "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) +
-    "?width=1024&height=576&nologo=true&seed=" + Math.floor(Math.random() * 1e6),
+  imageURL: (prompt, opts) => {
+    const o = opts || {};
+    return "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) +
+      "?width=" + (o.w || 1280) + "&height=" + (o.h || 720) +
+      "&model=flux&nologo=true&enhance=true&safe=true" +
+      "&negative_prompt=" + encodeURIComponent(NEGATIVE) +
+      "&seed=" + (o.seed || Math.floor(Math.random() * 1e6));
+  },
   // Préchargement via balise <img> : bien plus fiable que fetch() sur mobile
-  image: (prompt) => preloadImage(AI.imageURL(prompt), 90000),
+  image: (prompt, opts) => preloadImage(AI.imageURL(prompt, opts), 120000),
 };
+
+/* ---------- Direction artistique : la qualité des visuels se joue ici ---------- */
+const NEGATIVE = "blurry, deformed, ugly, bad anatomy, extra limbs, watermark, signature, text, low quality, jpeg artifacts, oversaturated";
+
+const ART_STYLES = {
+  cine: {
+    label: "🎬 Cinématique",
+    suffix: "cinematic film still, anamorphic lens, dramatic volumetric lighting, shallow depth of field, rich color grading, ultra detailed, 8k, masterpiece",
+  },
+  photo: {
+    label: "📸 Photo réaliste",
+    suffix: "professional photograph, photorealistic, natural lighting, sharp focus, highly detailed textures, shot on 50mm, award winning photography",
+  },
+  scifi: {
+    label: "🌆 Futuriste / sci-fi",
+    suffix: "futuristic concept art, sci-fi environment, neon glow, atmospheric fog, epic scale, artstation trending, highly detailed digital painting, masterpiece",
+  },
+  digital: {
+    label: "🎨 Art digital",
+    suffix: "beautiful digital art illustration, vibrant colors, smooth gradients, intricate details, trending on artstation, masterpiece",
+  },
+  anime: {
+    label: "✏️ Anime / manga",
+    suffix: "high quality anime illustration, studio ghibli inspired, clean lineart, vivid colors, detailed background, masterpiece",
+  },
+  "3d": {
+    label: "🧊 Rendu 3D",
+    suffix: "high quality 3D render, octane render, soft global illumination, detailed materials, studio lighting, unreal engine 5, 8k",
+  },
+  aquarelle: {
+    label: "🌸 Aquarelle",
+    suffix: "delicate watercolor painting, soft pastel palette, paper texture, artistic brush strokes, elegant composition",
+  },
+};
+
+function pickStyle(text) {
+  const t = (text || "").toLowerCase();
+  if (/futur|sci-?fi|cyber|néon|neon|espace|robot|ville.*demain/.test(t)) return "scifi";
+  if (/photo|réaliste|realiste|portrait/.test(t)) return "photo";
+  if (/anime|manga|ghibli/.test(t)) return "anime";
+  if (/3d|rendu/.test(t)) return "3d";
+  if (/aquarelle|peinture|painting/.test(t)) return "aquarelle";
+  return "cine";
+}
+
+// Repli hors-ligne : enrichissement local FR → EN du prompt
+function localArtPrompt(text) {
+  const map = [
+    [/château|chateau/gi, "castle"], [/coucher de soleil/gi, "sunset"],
+    [/futuriste/gi, "futuristic"], [/magique|magie/gi, "magical"],
+    [/forêt|foret/gi, "forest"], [/océan|ocean/gi, "ocean"], [/montagne/gi, "mountain"],
+    [/galaxie/gi, "galaxy"], [/espace/gi, "outer space"], [/solaire/gi, "solar"],
+    [/bureau/gi, "office"], [/chambre/gi, "room"], [/voiture/gi, "car"],
+    [/femme/gi, "woman"], [/homme/gi, "man"], [/ville/gi, "city"],
+    [/nuit/gi, "night"], [/jour\b/gi, "daylight"], [/dragon/gi, "dragon"], [/robot/gi, "robot"],
+  ];
+  let en = String(text || "beautiful scene");
+  for (const [re, rep] of map) en = en.replace(re, rep);
+  return en.trim();
+}
+
+// L'IA de texte devient directeur artistique : elle rédige le prompt parfait en anglais
+async function artDirection(userText) {
+  try {
+    const dir = await AI.text(
+      "Tu es directeur artistique international pour la génération d'images. Transforme cette idée en prompt de " +
+      "génération d'image en ANGLAIS, concret et visuel : sujet principal, décor, lumière, palette de couleurs, " +
+      "composition, ambiance. 35 mots maximum. Aucun texte dans l'image. Réponds UNIQUEMENT par le prompt.\n\nIdée : " + userText
+    );
+    return (dir || "").trim() || localArtPrompt(userText);
+  } catch {
+    return localArtPrompt(userText);
+  }
+}
+
+function buildImagePrompt(userText, styleKey, artDir) {
+  const style = ART_STYLES[styleKey] || ART_STYLES.cine;
+  return (artDir || localArtPrompt(userText)) + ", " + style.suffix;
+}
 
 async function fetchWithTimeout(url, opts, ms) {
   const ctrl = new AbortController();
@@ -1053,10 +1233,10 @@ function toast(msg) {
   const el = document.getElementById("typewriter");
   if (!el) return;
   const phrases = [
-    "Planifie ma journée en 3 blocs focus…",
-    "Rédige un post LinkedIn sur la concentration…",
-    "Génère un visuel de ville solaire…",
-    "Découpe mon rapport en micro-étapes…",
+    "Préparer ma réunion d'équipe de demain…",
+    "Rédiger mon rapport trimestriel à la direction…",
+    "Relancer un client en retard de paiement…",
+    "Organiser ma semaine : 3 projets en parallèle…",
   ];
   let pi = 0, ci = 0, deleting = false;
   (function step() {
@@ -1209,7 +1389,7 @@ async function askText(prompt, fallbackKey, userText) {
 const commandInput = document.getElementById("command-input");
 const commandRun = document.getElementById("command-run");
 
-async function executeCommand(text) {
+async function executeCommandLegacy(text) {
   const cmd = (text || "").trim();
   if (!cmd) {
     toast("Décrivez votre besoin — ex. : « planifie ma journée »");
@@ -1223,6 +1403,7 @@ async function executeCommand(text) {
   const intent = detectIntent(cmd);
 
   if (intent.id === "visual") {
+    const styleKey = pickStyle(cmd);
     await runSteps([
       {
         label: "Interprétation de votre idée visuelle",
@@ -1232,27 +1413,44 @@ async function executeCommand(text) {
         }),
       },
       {
-        label: "Génération de l'image (comptez 10 à 30 s…)",
-        run: async () => {
-          try {
-            const url = await AI.image(intent.buildPrompt(cmd));
+        label: "Direction artistique (l'IA compose le prompt parfait)",
+        run: async (prev) => {
+          const dir = await artDirection(prev.raw || cmd);
+          return {
+            html:
+              "<p><strong>Recette de l'image</strong> — style <em>" + esc(ART_STYLES[styleKey].label) + "</em> :</p>" +
+              '<div class="result-note" style="background:rgba(34,211,238,0.07);border-color:rgba(34,211,238,0.3);color:#c9e8f2">' +
+              esc(dir) + "</div>",
+            raw: dir,
+          };
+        },
+      },
+      {
+        label: "Génération de 2 variations haute qualité (10 à 30 s…)",
+        run: async (prev) => {
+          const prompt = buildImagePrompt(cmd, styleKey, prev.raw);
+          const results = await Promise.allSettled([
+            AI.image(prompt, { w: 1280, h: 720 }),
+            AI.image(prompt, { w: 1280, h: 720 }),
+          ]);
+          const urls = results.filter((r) => r.status === "fulfilled").map((r) => r.value);
+          if (!urls.length) {
             return {
               html:
-                "<p><strong>Visuel généré :</strong></p>" +
-                '<p><img src="' + esc(url) + '" alt="Visuel généré par IA" /></p>' +
-                '<p><a href="' + esc(url) + '" target="_blank" rel="noopener">🔗 Ouvrir le visuel en grand</a>' +
-                " — <em>sur mobile : appui long sur l'image pour l'enregistrer.</em></p>",
-              raw: "Visuel généré : " + url,
-            };
-          } catch (e) {
-            return {
-              html:
-                "<p>Le moteur d'image est momentanément saturé (service gratuit). " +
-                "Réessayez dans un instant, ou reformulez légèrement votre idée.</p>" +
-                '<div class="result-note">Astuce : les visuels marchent mieux avec une description concrète (style, couleurs, ambiance, lumière).</div>',
+                "<p>Le moteur d'image est saturé pour l'instant (service gratuit). Réessayez dans un instant.</p>" +
+                '<div class="result-note">La direction artistique est prête : relancez la commande pour tenter votre chance.</div>',
               raw: "",
             };
           }
+          return {
+            html:
+              "<p><strong>Vos visuels :</strong> gardez la meilleure variation — <em>sur mobile : appui long pour enregistrer.</em></p>" +
+              '<div class="variations">' + urls.map((u, i) =>
+                '<figure class="var-card"><img src="' + esc(u) + '" alt="Variation ' + (i + 1) + '" />' +
+                '<figcaption><a href="' + esc(u) + '" target="_blank" rel="noopener">🔗 Variation ' + (i + 1) + " — grand format</a></figcaption></figure>"
+              ).join("") + "</div>",
+            raw: "Visuels générés : " + urls.join(" | "),
+          };
         },
       },
     ]);
@@ -1300,6 +1498,343 @@ async function executeCommand(text) {
   commandRun.disabled = false;
   saveHistory(cmd);
 }
+
+/* ============================================================
+   SON D'INTERFACE — synthétisé en direct (Web Audio, 0 fichier)
+   ============================================================ */
+const SFX = {
+  enabled: true,
+  ctx: null,
+  ensure() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) this.ctx = new AC();
+    }
+    if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+    return this.ctx;
+  },
+  tone(freq, dur, type, vol, when) {
+    const ctx = this.ensure();
+    if (!ctx || !this.enabled) return;
+    const t = ctx.currentTime + (when || 0);
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.05, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(ctx.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  },
+  blip() { this.tone(720, 0.09, "triangle", 0.05); },
+  click() { this.tone(880, 0.05, "square", 0.025); },
+  launch() {
+    this.tone(220, 0.12, "sawtooth", 0.035);
+    this.tone(440, 0.12, "sawtooth", 0.035, 0.1);
+    this.tone(660, 0.2, "triangle", 0.05, 0.2);
+  },
+  done() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.38, "triangle", 0.05, i * 0.1)); },
+};
+
+const soundToggle = document.getElementById("sound-toggle");
+if (soundToggle) {
+  soundToggle.addEventListener("click", () => {
+    SFX.enabled = !SFX.enabled;
+    soundToggle.textContent = SFX.enabled ? "🔊" : "🔇";
+    if (SFX.enabled) SFX.click();
+    toast(SFX.enabled ? "Sons activés" : "Sons coupés");
+  });
+}
+
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+/* ============================================================
+   GÉNÉRATEUR DE KITS — une mission → N livrables en orchestre
+   ============================================================ */
+const KIT_SYS =
+  SYSTEM_BASE +
+  "\n\nExpert du monde professionnel des cadres et managers : concret, structuré, français professionnel, " +
+  "directement utilisable sans retouche. Pas de généralités.";
+function K(mission, instr) {
+  return KIT_SYS + "\n\nMISSION DU CADRE : " + mission + "\n\n" + instr;
+}
+
+const KITS = [
+  {
+    key: "reunion", icon: "🎯", title: "Kit Réunion",
+    match: ["réunion", "reunion", "meeting", "hebdo", "comité", "comite", "atelier", "visio", "point d'équipe", "point d'equipe", "entretien"],
+    build: (m) => [
+      { icon: "📋", label: "Ordre du jour", fallback: "planner", prompt: K(m, "Rédige un ordre du jour structuré : objectif, points avec temps estimés, décisions attendues, préparation demandée aux participants.") },
+      { icon: "✉️", label: "Message d'invitation", fallback: "writer", prompt: K(m, "Rédige un message d'invitation prêt à envoyer : objet percutant, contexte, objectif, ordre du jour en 3 lignes, durée, ton positif.") },
+      { icon: "⚠️", label: "Risques & décisions clés", fallback: "decide", prompt: K(m, "Liste les points de décision clés, les risques potentiels de la réunion et les arguments à préparer pour chacun.") },
+      { icon: "📝", label: "Modèle de compte-rendu", fallback: "writer", prompt: K(m, "Fournis un modèle de compte-rendu prêt à remplir : décisions, actions avec responsables et échéances, prochain point.") },
+      { icon: "📨", label: "Message de suivi", fallback: "writer", prompt: K(m, "Rédige le message de suivi post-réunion : synthème des décisions, actions par personne, échéances, ton fédérateur.") },
+    ],
+  },
+  {
+    key: "rapport", icon: "📊", title: "Kit Rapport",
+    match: ["rapport", "bilan", "compte rendu", "compte-rendu", "synthèse", "synthese", "présentation", "presentation", "slides", "trimestriel", "annuel", "activité"],
+    build: (m) => [
+      { icon: "🏗️", label: "Structure & plan détaillé", fallback: "planner", prompt: K(m, "Propose un plan détaillé et logique (parties, sous-parties, message clé de chaque section).") },
+      { icon: "⚡", label: "Synthèse exécutive", fallback: "writer", prompt: K(m, "Rédige une synthèse exécutive percutante en 5 points pour un dirigeant pressé.") },
+      { icon: "🎞️", label: "Fil conducteur des slides", fallback: "writer", prompt: K(m, "Décris le fil conducteur d'une présentation slides : titre de chaque slide + le message à faire passer.") },
+      { icon: "🛡️", label: "Points forts & objections", fallback: "decide", prompt: K(m, "Liste les 5 points clés à défendre et les objections probables avec les réponses à préparer.") },
+      { icon: "✉️", label: "Mail d'accompagnement", fallback: "writer", prompt: K(m, "Rédige le mail d'accompagnement du rapport à destination de la direction : objet, contexte, points saillants, appel à décision.") },
+    ],
+  },
+  {
+    key: "mail", icon: "✉️", title: "Kit Mail difficile",
+    match: ["mail", "e-mail", "email", "relance", "relancer", "litige", "plainte", "recadrer", "refuser", "négocier", "negocier", "retard de paiement", "désaccord", "desaccord"],
+    build: (m) => [
+      { icon: "🛡️", label: "Version ferme", fallback: "writer", prompt: K(m, "Rédige une version FERME du mail : claire, professionnelle, sans agressivité mais sans concession.") },
+      { icon: "🤝", label: "Version diplomate", fallback: "writer", prompt: K(m, "Rédige une version DIPLOMATE du mail : relation préservée, message ferme en filigrane.") },
+      { icon: "⚡", label: "Version directe", fallback: "writer", prompt: K(m, "Rédige une version COURTE et DIRECTE du mail : 5 phrases maximum, droit au but.") },
+      { icon: "♟️", label: "Stratégie & timing", fallback: "decide", prompt: K(m, "Quelle version privilégier, quand l'envoyer, et quelle suite donner si pas de réponse ? Conseils concrets.") },
+      { icon: "💬", label: "Objections & réponses", fallback: "decide", prompt: K(m, "Anticipe les 4 objections probables du destinataire et donne la réponse à chacune.") },
+    ],
+  },
+  {
+    key: "projet", icon: "🚀", title: "Kit Projet",
+    match: ["projet", "lancement", "lancer", "plan d'action", "planification", "roadmap", "phoenix", "transformation", "mise en place"],
+    build: (m) => [
+      { icon: "🗺️", label: "Plan d'action en 5 jalons", fallback: "planner", prompt: K(m, "Construis un plan d'action en 5 jalons : objectifs, livrables, échéances réalistes, critères de réussite.") },
+      { icon: "👥", label: "Message de lancement", fallback: "writer", prompt: K(m, "Rédige le message de lancement à l'équipe : vision, objectifs, rôles, premières actions, ton mobilisateur.") },
+      { icon: "⚠️", label: "Risques & parades", fallback: "decide", prompt: K(m, "Identifie les 5 principaux risques du projet et les parades concrètes pour chacun.") },
+      { icon: "📈", label: "Tableau de bord de suivi", fallback: "planner", prompt: K(m, "Propose la structure d'un tableau de bord de suivi : indicateurs, fréquence de revue, points de vigilance.") },
+      { icon: "✅", label: "Première étape cette semaine", fallback: "planner", prompt: K(m, "Quelle est LA première action à lancer dès cette semaine ? Découpe-la en tâches de moins d'1h.") },
+    ],
+  },
+  {
+    key: "semaine", icon: "📅", title: "Kit Semaine",
+    match: ["semaine", "planning", "agenda", "priorité", "priorite", "organiser", "organisation", "charge de travail", "emploi du temps", "journee", "journée"],
+    build: (m) => [
+      { icon: "🥇", label: "Priorités de la semaine", fallback: "planner", prompt: K(m, "Priorise les éléments de la mission en méthode impact/effort : 3 essentiels, 3 importants, le reste à déléguer ou supprimer.") },
+      { icon: "🗓️", label: "Planning idéal", fallback: "planner", prompt: K(m, "Construis un planning type de semaine réaliste : blocs focus, réunions regroupées, temps de récupération.") },
+      { icon: "✉️", label: "3 messages de cadrage", fallback: "writer", prompt: K(m, "Rédige 3 messages courts : 1 pour anticiper un imprévu, 1 pour déléguer, 1 pour décaler une réunion.") },
+      { icon: "🌅", label: "Routine du matin", fallback: "planner", prompt: K(m, "Propose une routine de démarrage de 20 minutes qui maximise la productivité de la journée.") },
+      { icon: "🏁", label: "Rituel du vendredi", fallback: "planner", prompt: K(m, "Propose un rituel de bilan du vendredi en 10 minutes : questions clés, notes, préparation du lundi.") },
+    ],
+  },
+  {
+    key: "annonce", icon: "📣", title: "Kit Annonce",
+    match: ["annonce", "annoncer", "changement", "réorganisation", "reorganisation", "nouvelle organisation", "diffuser", "communiquer", "information importante"],
+    build: (m) => [
+      { icon: "🔍", label: "Analyse de la situation", fallback: "decide", prompt: K(m, "Analyse la situation : enjeux pour l'équipe, points sensibles, ce qui doit absolument être dit et ce qui peut attendre.") },
+      { icon: "📣", label: "Le message d'annonce", fallback: "writer", prompt: K(m, "Rédige le message d'annonce : clair, structuré (quoi, pourquoi, quand, impact), ton rassurant et lucide.") },
+      { icon: "💬", label: "Gestion des réactions", fallback: "decide", prompt: K(m, "Anticipe les réactions possibles (inquiétudes, frustrations, questions) et comment y répondre oralement.") },
+      { icon: "🗺️", label: "Plan de mise en œuvre", fallback: "planner", prompt: K(m, "Propose un plan de mise en œuvre progressif : étapes, communication, points de contrôle, soutien à l'équipe.") },
+      { icon: "❓", label: "Questions / réponses", fallback: "writer", prompt: K(m, "Rédige une foire aux questions (6-8 Q/R) pour accompagner l'annonce.") },
+    ],
+  },
+  {
+    key: "polyvalent", icon: "🧠", title: "Kit Mission Complète",
+    match: [],
+    build: (m) => [
+      { icon: "🔍", label: "Analyse express", fallback: "decide", prompt: K(m, "Analyse la mission en 5 points clés : enjeu, contraintes, opportunités, risques, résultat attendu.") },
+      { icon: "🗺️", label: "Plan d'action", fallback: "planner", prompt: K(m, "Propose un plan d'action concret en 5 étapes avec échéances réalistes.") },
+      { icon: "✉️", label: "Message clé", fallback: "writer", prompt: K(m, "Rédige le message principal à envoyer pour faire avancer cette mission (ton professionnel).") },
+      { icon: "💡", label: "5 idées actionnables", fallback: "ideas", prompt: K(m, "Propose 5 idées actionnables et créatives pour réussir cette mission.") },
+      { icon: "✅", label: "Prochaine étape", fallback: "planner", prompt: K(m, "Quelle est la toute première action à faire dans les 24h ? Découpe-la précisément.") },
+    ],
+  },
+];
+
+function detectKit(text) {
+  const t = (text || "").toLowerCase();
+  let best = null, bestScore = 0;
+  for (const kit of KITS) {
+    let score = 0;
+    for (const kw of kit.match) if (t.includes(kw)) score++;
+    if (score > bestScore) { bestScore = score; best = kit; }
+  }
+  return bestScore > 0 ? best : KITS[KITS.length - 1];
+}
+
+/* ---------- Tableau de mission : le kit se construit en direct ---------- */
+async function runKitBoard(kit, cmd, steps) {
+  setStatus("Mission lancée — l'orchestre IA mobilisé…");
+  resultSteps.hidden = true;
+  resultSteps.innerHTML = "";
+  const t0 = Date.now();
+  const timer = setInterval(() => {
+    const el = document.getElementById("kit-timer");
+    if (el) el.textContent = Math.round((Date.now() - t0) / 1000) + " s";
+  }, 250);
+
+  resultBody.innerHTML =
+    '<div class="kit-board">' +
+      '<div class="kit-hud">' +
+        '<div class="kit-hud-left">' +
+          '<span class="kit-icon-big">' + kit.icon + "</span>" +
+          "<div><h3 class=\"kit-title\">" + esc(kit.title) + "</h3>" +
+          '<p class="kit-mission">Mission : « ' + esc(cmd) + ' »</p></div>' +
+        "</div>" +
+        '<div class="kit-hud-right">' +
+          '<div class="hud-stat"><span class="hud-label">Chrono</span><strong id="kit-timer">0 s</strong></div>' +
+          '<div class="hud-stat"><span class="hud-label">Progression</span><strong id="kit-progress">0 / ' + steps.length + "</strong></div>" +
+          '<div class="hud-stat"><button class="btn-mini" id="kit-copy-all">📋 Tout copier</button></div>' +
+        "</div>" +
+      "</div>" +
+      '<div class="kit-progress-bar"><div class="kit-progress-fill" id="kit-progress-fill"></div></div>' +
+      '<div class="kit-grid">' +
+        steps.map((s, i) =>
+          '<article class="kit-card" id="kit-card-' + i + '" data-state="pending">' +
+            '<header class="kit-card-head">' +
+              '<span class="kit-card-ico">' + s.icon + "</span>" +
+              "<h4>" + esc(s.label) + "</h4>" +
+              '<span class="kit-badge" id="kit-badge-' + i + '">en attente</span>' +
+            "</header>" +
+            '<div class="kit-card-body" id="kit-card-body-' + i + '"><div class="mz-loader"><i></i><i></i><i></i></div></div>' +
+            '<footer class="kit-card-foot"><button class="btn-mini kit-copy" data-idx="' + i + '">📋 Copier</button></footer>' +
+          "</article>"
+        ).join("") +
+      "</div>" +
+    "</div>";
+
+  let done = 0;
+  await Promise.all(steps.map((s, i) => (async () => {
+    await sleep(i * 350); // léger décalage : respecte les limites des IA gratuites
+    const card = document.getElementById("kit-card-" + i);
+    const badge = document.getElementById("kit-badge-" + i);
+    if (card) card.dataset.state = "running";
+    if (badge) badge.textContent = "génération…";
+    let html = "";
+    try {
+      if (s.run) {
+        const res = await s.run();
+        html = typeof res === "string" ? res : (res.html || "");
+      } else {
+        const answer = await askText(s.prompt, s.fallback || "generic", cmd);
+        html = mdToHtml(answer);
+      }
+    } catch (e) {
+      html = '<div class="result-note">⚠️ Livrable temporairement indisponible — relancez la mission.</div>';
+    }
+    const body = document.getElementById("kit-card-body-" + i);
+    if (body) body.innerHTML = html;
+    if (card) card.dataset.state = "done";
+    if (badge) badge.textContent = "✓ prêt";
+    done++;
+    const p = document.getElementById("kit-progress");
+    if (p) p.textContent = done + " / " + steps.length;
+    const fill = document.getElementById("kit-progress-fill");
+    if (fill && fill.style) fill.style.width = Math.round((done / steps.length) * 100) + "%";
+    if (done < steps.length) SFX.blip();
+  })()));
+
+  clearInterval(timer);
+  const tEl = document.getElementById("kit-timer");
+  if (tEl) tEl.textContent = Math.round((Date.now() - t0) / 1000) + " s";
+  setStatus("✓ Kit terminé — " + steps.length + " livrables prêts à l'emploi");
+  SFX.done();
+}
+
+/* ---------- Kits texte (cadres) ---------- */
+async function runKit(kit, cmd) {
+  await runKitBoard(kit, cmd, kit.build(cmd));
+}
+
+/* ---------- Kit visuel : direction artistique + variations + textes ---------- */
+function imgLivre(url, label) {
+  return (
+    '<p><img src="' + esc(url) + '" alt="' + esc(label) + '" /></p>' +
+    '<p><a href="' + esc(url) + '" target="_blank" rel="noopener">🔗 ' + esc(label) + " — grand format</a></p>"
+  );
+}
+
+async function runVisualKit(cmd) {
+  const styleKey = pickStyle(cmd);
+  const dir = await artDirection(cmd);
+  const prompt = buildImagePrompt(cmd, styleKey, dir);
+  const steps = [
+    {
+      icon: "🧠", label: "Direction artistique",
+      run: async () => ({ html: "<p><em>« " + esc(dir) + " »</em></p><p>Style : <strong>" + esc(ART_STYLES[styleKey].label) + "</strong></p>" }),
+    },
+    {
+      icon: "🖼️", label: "Variation 1",
+      run: async () => {
+        const u = await AI.image(prompt, { w: 1280, h: 720 });
+        return { html: imgLivre(u, "Variation 1") };
+      },
+    },
+    {
+      icon: "🖼️", label: "Variation 2",
+      run: async () => {
+        const u = await AI.image(prompt, { w: 1280, h: 720 });
+        return { html: imgLivre(u, "Variation 2") };
+      },
+    },
+    {
+      icon: "📝", label: "Légendes & posts",
+      run: async () => ({ html: mdToHtml(await askText(K(cmd, "Rédige 2 légendes percutantes pour les réseaux sociaux et 1 description courte pour accompagner ce visuel."), "writer", cmd)) }),
+    },
+    {
+      icon: "💡", label: "3 réutilisations",
+      run: async () => ({ html: mdToHtml(await askText(K(cmd, "Propose 3 façons concrètes de réutiliser ce visuel (posts, bannières, présentation…)."), "ideas", cmd)) }),
+    },
+  ];
+  await runKitBoard({ icon: "🎨", title: "Kit Visuel" }, cmd, steps);
+}
+
+/* ---------- Nouvelle commande universelle : TOUJOURS un kit ---------- */
+async function executeCommand(text) {
+  const cmd = (text || "").trim();
+  if (!cmd) {
+    toast("Décrivez votre mission — ex. : « préparer ma réunion de demain »");
+    commandInput.focus();
+    return;
+  }
+  showResult();
+  commandRun.disabled = true;
+  SFX.launch();
+  try {
+    if (detectIntent(cmd).id === "visual") {
+      await runVisualKit(cmd);
+    } else {
+      await runKit(detectKit(cmd), cmd);
+    }
+  } catch (e) {
+    console.warn(e);
+    setStatus("⚠️ Mission interrompue — réessayez");
+  }
+  commandRun.disabled = false;
+  saveHistory(cmd);
+}
+
+/* ---------- Sons de copie + copie globale du kit ---------- */
+resultBody.addEventListener("click", async (e) => {
+  const copyOne = e.target.closest(".kit-copy");
+  const copyAll = e.target.closest("#kit-copy-all");
+  if (copyOne) {
+    const body = document.getElementById("kit-card-body-" + copyOne.dataset.idx);
+    try { await navigator.clipboard.writeText(body.innerText); SFX.click(); toast("Livrable copié ✓"); }
+    catch { toast("Copie impossible dans ce contexte"); }
+  } else if (copyAll) {
+    try {
+      const all = [...document.querySelectorAll(".kit-card-body")].map((b) => b.innerText).join("\n\n———\n\n");
+      await navigator.clipboard.writeText(all);
+      SFX.click();
+      toast("Kit complet copié ✓");
+    } catch { toast("Copie impossible dans ce contexte"); }
+  }
+});
+
+/* ---------- Effet 3D au survol (desktop) ---------- */
+(function tilt() {
+  if (!window.matchMedia || window.matchMedia("(hover: none)").matches) return;
+  document.querySelectorAll(".module-card, .chain-card").forEach((el) => {
+    el.classList.add("tilt");
+    el.addEventListener("mousemove", (e) => {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transform =
+        "perspective(850px) rotateY(" + (x * 7).toFixed(2) + "deg) rotateX(" + (-y * 7).toFixed(2) + "deg) translateY(-5px)";
+    });
+    el.addEventListener("mouseleave", () => { el.style.transform = ""; });
+  });
+})();
 
 commandRun.addEventListener("click", () => executeCommand(commandInput.value));
 commandInput.addEventListener("keydown", (e) => {
@@ -1427,30 +1962,54 @@ const MODULES = {
   visual: {
     title: "🎨 Visuel IA",
     render() {
+      const styleOpts = Object.keys(ART_STYLES)
+        .map((k) => '<option value="' + k + '">' + ART_STYLES[k].label + "</option>")
+        .join("");
       return `
         <div><label class="mz-label">Décrivez l'image de vos rêves</label>
-          <input class="mz-input" id="vi-prompt" placeholder="Ex. : ville solaire futuriste au coucher du soleil, style concept art…" /></div>
-        <button class="btn btn-primary" id="vi-run">Générer le visuel</button>
+          <input class="mz-input" id="vi-prompt" placeholder="Ex. : ville solaire futuriste au coucher du soleil…" /></div>
+        <div class="mz-row">
+          <div><label class="mz-label">Style artistique</label>
+            <select class="mz-select" id="vi-style">${styleOpts}</select></div>
+          <div><label class="mz-label">Format</label>
+            <select class="mz-select" id="vi-format">
+              <option value="1280x720">Paysage (16:9) — posts, bannières</option>
+              <option value="1024x1024">Carré (1:1) — réseaux sociaux</option>
+              <option value="720x1280">Portrait (9:16) — stories, mobile</option>
+            </select></div>
+        </div>
+        <button class="btn btn-primary" id="vi-run">✨ Générer 2 variations haute qualité</button>
         <div class="mz-output" id="vi-out"></div>`;
     },
     bind() {
-      document.getElementById("vi-run").addEventListener("click", () => {
+      document.getElementById("vi-run").addEventListener("click", async () => {
         const p = document.getElementById("vi-prompt").value.trim();
+        const styleKey = document.getElementById("vi-style").value;
+        const fmt = document.getElementById("vi-format").value.split("x").map(Number);
         const out = document.getElementById("vi-out");
         if (!p) { toast("Décrivez d'abord votre image"); return; }
-        out.innerHTML = loaderHtml();
-        AI.image("high quality digital art, cinematic lighting, detailed: " + p)
-          .then((url) => {
-            out.innerHTML =
-              '<img src="' + url + '" alt="Visuel IA" loading="lazy" />' +
-              "<p><em>Clic droit → Enregistrer l'image pour la conserver.</em></p>";
-            toast("Visuel généré ✓");
-          })
-          .catch(() => {
-            out.innerHTML =
-              "<p>Moteur d'image indisponible (hors-ligne ?). Réessayez avec une connexion Internet.</p>" +
-              '<div class="result-note">Mode démo : aucune image générée.</div>';
-          });
+        out.innerHTML = loaderHtml() + "<p>Direction artistique puis génération de 2 variations… (comptez 10 à 30 s)</p>";
+        const dir = await artDirection(p);
+        const prompt = buildImagePrompt(p, styleKey, dir);
+        const results = await Promise.allSettled([
+          AI.image(prompt, { w: fmt[0], h: fmt[1] }),
+          AI.image(prompt, { w: fmt[0], h: fmt[1] }),
+        ]);
+        const urls = results.filter((r) => r.status === "fulfilled").map((r) => r.value);
+        if (!urls.length) {
+          out.innerHTML =
+            "<p>Moteur d'image saturé pour l'instant (service gratuit). Réessayez dans un instant.</p>" +
+            '<div class="result-note">Direction artistique préparée : « ' + esc(dir) + " »</div>";
+          return;
+        }
+        out.innerHTML =
+          "<p><strong>Direction artistique :</strong> <em>" + esc(dir) + "</em></p>" +
+          '<div class="variations">' + urls.map((u, i) =>
+            '<figure class="var-card"><img src="' + esc(u) + '" alt="Variation ' + (i + 1) + '" />' +
+            '<figcaption><a href="' + esc(u) + '" target="_blank" rel="noopener">🔗 Variation ' + (i + 1) + " — grand format</a></figcaption></figure>"
+          ).join("") + "</div>" +
+          "<p><em>Deux propositions : gardez la meilleure, ou relancez pour explorer d'autres pistes.</em></p>";
+        toast("Visuels générés ✓");
       });
     },
   },
@@ -1576,10 +2135,14 @@ const CHAINS = {
         label: "Visuel généré pour le post (10 à 30 s…)",
         run: async (input, prevRaw) => {
           try {
-            const url = await AI.image("modern editorial illustration, vibrant gradient background, abstract, high quality: " + (prevRaw || input).slice(0, 200));
+            const src = (prevRaw || input).slice(0, 200);
+            const dir = await artDirection("editorial illustration for a post about: " + src);
+            const prompt = buildImagePrompt(src, "digital", dir);
+            const url = await AI.image(prompt, { w: 1280, h: 720 });
             return {
               html:
-                "<h4>3 · Visuel</h4><p><img src='" + esc(url) + "' alt='Visuel du post' /></p>" +
+                "<h4>3 · Visuel</h4><p><em>« " + esc(dir) + " »</em></p>" +
+                "<p><img src='" + esc(url) + "' alt='Visuel du post' /></p>" +
                 "<p><a href='" + esc(url) + "' target='_blank' rel='noopener'>🔗 Ouvrir le visuel en grand</a></p>",
               raw: "Visuel généré : " + url,
             };
@@ -1652,5 +2215,5 @@ document.getElementById("chaines").addEventListener("click", async (e) => {
 });
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a48e6a289b7fbb84',t:'MTc5MTcyNzQ3NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a48e9c9f9acea0cb',t:'MTc5MTcyOTU0MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
