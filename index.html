@@ -13,7 +13,477 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+/* ============================================================
+   SYNAPSE — design system futuriste / néon / glassmorphism
+   ============================================================ */
+
+:root {
+  --bg-0: #05070d;
+  --bg-1: #0a0e1a;
+  --glass: rgba(255, 255, 255, 0.045);
+  --glass-strong: rgba(255, 255, 255, 0.07);
+  --stroke: rgba(255, 255, 255, 0.1);
+  --stroke-hot: rgba(120, 220, 255, 0.45);
+  --text-0: #eef2ff;
+  --text-1: #aab3c9;
+  --text-2: #6b7590;
+  --cyan: #22d3ee;
+  --violet: #a855f7;
+  --pink: #f472b6;
+  --amber: #fbbf24;
+  --green: #34d399;
+  --blue: #60a5fa;
+  --grad-1: linear-gradient(120deg, #22d3ee, #a855f7);
+  --grad-2: linear-gradient(120deg, #f472b6, #a855f7, #22d3ee);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --shadow-glow: 0 0 40px rgba(34, 211, 238, 0.18), 0 0 80px rgba(168, 85, 247, 0.12);
+  --font-body: "Space Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Orbitron", "Space Grotesk", system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-0);
+  color: var(--text-0);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: rgba(168, 85, 247, 0.45); color: #fff; }
+
+/* ---------- Fond animé ---------- */
+.bg-fx { position: fixed; inset: 0; z-index: -1; overflow: hidden; background:
+  radial-gradient(1200px 700px at 80% -10%, rgba(168, 85, 247, 0.16), transparent 60%),
+  radial-gradient(1000px 600px at 10% 110%, rgba(34, 211, 238, 0.12), transparent 60%),
+  linear-gradient(180deg, var(--bg-0), var(--bg-1) 50%, var(--bg-0));
+}
+.orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; animation: drift 26s ease-in-out infinite alternate; }
+.orb-a { width: 520px; height: 520px; background: rgba(34, 211, 238, 0.22); top: -140px; right: -80px; }
+.orb-b { width: 460px; height: 460px; background: rgba(168, 85, 247, 0.22); bottom: -160px; left: -120px; animation-delay: -8s; }
+.orb-c { width: 320px; height: 320px; background: rgba(244, 114, 182, 0.16); top: 45%; left: 55%; animation-delay: -15s; }
+@keyframes drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-60px, 50px) scale(1.15); }
+}
+.grid-lines {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 75%);
+}
+#neural-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.55; }
+
+/* ---------- Typographie ---------- */
+.grad-text {
+  background: var(--grad-1);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.grad-text-alt {
+  background: var(--grad-2);
+  background-size: 200% 200%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: grad-shift 8s ease infinite;
+}
+@keyframes grad-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.02em; line-height: 1.15; }
+h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--cyan);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  background: rgba(34, 211, 238, 0.08);
+  padding: 6px 14px; border-radius: 999px; margin-bottom: 1.1rem;
+}
+
+.pulse-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+  70% { box-shadow: 0 0 0 9px rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+/* ---------- Glass ---------- */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Boutons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--font-body); font-weight: 600; font-size: 0.95rem;
+  padding: 13px 24px; border-radius: 14px; border: none; cursor: pointer;
+  text-decoration: none; color: var(--text-0);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--grad-1); color: #041018;
+  box-shadow: 0 8px 28px rgba(34, 211, 238, 0.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(168, 85, 247, 0.5); }
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--stroke);
+}
+.btn-ghost:hover { border-color: var(--stroke-hot); background: rgba(34, 211, 238, 0.08); transform: translateY(-2px); }
+.btn-sm { padding: 9px 18px; font-size: 0.85rem; border-radius: 11px; }
+.btn-mini { padding: 6px 13px; font-size: 0.78rem; border-radius: 9px; background: rgba(255, 255, 255, 0.07); border: 1px solid var(--stroke); cursor: pointer; color: var(--text-0); font-weight: 600; }
+.btn-mini:hover { border-color: var(--stroke-hot); }
+.btn-lg { padding: 17px 34px; font-size: 1.05rem; }
+
+/* ---------- Navigation ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 28px;
+  padding: 15px clamp(18px, 5vw, 56px);
+  background: rgba(6, 9, 16, 0.72);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--text-0); }
+.brand-name {
+  font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; letter-spacing: 0.22em;
+  background: var(--grad-1); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.nav-links { display: flex; gap: 26px; margin-left: auto; }
+.nav-links a {
+  color: var(--text-1); text-decoration: none; font-size: 0.92rem; font-weight: 500;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--cyan); }
+.nav-burger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+.nav-burger span { width: 22px; height: 2px; background: var(--text-0); border-radius: 2px; }
+
+/* ---------- Hero ---------- */
+.hero {
+  display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(28px, 5vw, 70px);
+  align-items: center;
+  padding: clamp(48px, 8vw, 110px) clamp(18px, 5vw, 56px) clamp(40px, 6vw, 80px);
+  max-width: 1280px; margin: 0 auto;
+}
+.hero-title {
+  font-size: clamp(2.1rem, 5.4vw, 3.9rem);
+  font-weight: 800;
+  margin-bottom: 1.2rem;
+}
+.hero-sub { color: var(--text-1); font-size: clamp(1rem, 1.6vw, 1.16rem); max-width: 56ch; margin-bottom: 2rem; }
+.hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 2.6rem; }
+.hero-stats {
+  display: flex; gap: clamp(18px, 3vw, 42px); list-style: none; flex-wrap: wrap;
+}
+.hero-stats li { display: flex; flex-direction: column; }
+.hero-stats strong {
+  font-family: var(--font-display); font-size: 1.55rem; font-weight: 700;
+  background: var(--grad-1); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.hero-stats span { color: var(--text-2); font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+.hero-panel { overflow: hidden; box-shadow: var(--shadow-glow); animation: float 7s ease-in-out infinite; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+.hero-panel-bar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 13px 17px; border-bottom: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.03);
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+.hero-panel-title { margin-left: 8px; color: var(--text-2); font-size: 0.78rem; letter-spacing: 0.08em; }
+.hero-terminal { padding: 22px 20px; min-height: 210px; }
+.t-prompt { color: var(--cyan); font-weight: 700; }
+.t-line { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.92rem; color: var(--text-0); }
+.caret { color: var(--cyan); animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.t-out { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+.t-chip {
+  font-size: 0.78rem; padding: 7px 13px; border-radius: 999px;
+  background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3);
+  color: var(--green); font-weight: 600;
+}
+.hero-panel-foot {
+  padding: 12px 18px; border-top: 1px solid var(--stroke);
+  display: flex; align-items: center;
+}
+.status-live { display: inline-flex; align-items: center; gap: 8px; color: var(--text-2); font-size: 0.78rem; letter-spacing: 0.05em; }
+
+/* ---------- Sections ---------- */
+.section { max-width: 1280px; margin: 0 auto; padding: clamp(48px, 7vw, 92px) clamp(18px, 5vw, 56px); }
+.section-head { max-width: 760px; margin-bottom: clamp(28px, 4vw, 48px); }
+.section-sub { color: var(--text-1); font-size: 1.05rem; }
+
+/* ---------- Barre de commande ---------- */
+.command-bar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 12px 12px 22px;
+  box-shadow: var(--shadow-glow);
+  border-color: rgba(120, 220, 255, 0.25);
+}
+.command-icon { color: var(--cyan); flex-shrink: 0; animation: spin-slow 14s linear infinite; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.command-bar input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--text-0); font-family: var(--font-body); font-size: 1.05rem;
+  min-width: 0;
+}
+.command-bar input::placeholder { color: var(--text-2); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.chip {
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--stroke);
+  color: var(--text-1); padding: 9px 16px; border-radius: 999px;
+  font-family: var(--font-body); font-size: 0.85rem; cursor: pointer;
+  transition: all 0.16s ease;
+}
+.chip:hover { color: var(--text-0); border-color: var(--stroke-hot); background: rgba(34, 211, 238, 0.1); transform: translateY(-2px); }
+
+/* ---------- Panneau de résultat ---------- */
+.result-panel { margin-top: 26px; overflow: hidden; }
+.result-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 15px 20px; border-bottom: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.03); flex-wrap: wrap;
+}
+.result-status { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; color: var(--cyan); }
+.result-actions { display: flex; gap: 8px; }
+.steps { list-style: none; padding: 16px 20px 0; display: flex; flex-direction: column; gap: 8px; }
+.steps li {
+  display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-1);
+}
+.steps .step-ico {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.07); border: 1px solid var(--stroke);
+}
+.steps li.done .step-ico { background: rgba(52, 211, 153, 0.18); border-color: rgba(52, 211, 153, 0.5); color: var(--green); }
+.steps li.running .step-ico { background: rgba(34, 211, 238, 0.18); border-color: var(--cyan); color: var(--cyan); animation: pulse 1.4s infinite; }
+.result-body { padding: 20px 22px 24px; font-size: 1rem; color: var(--text-0); }
+.result-body h4 { font-family: var(--font-display); margin: 1.1rem 0 0.5rem; color: var(--cyan); font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.result-body p { margin-bottom: 0.75rem; color: var(--text-1); }
+.result-body ul, .result-body ol { margin: 0 0 0.9rem 1.25rem; color: var(--text-1); }
+.result-body li { margin-bottom: 0.35rem; }
+.result-body strong { color: var(--text-0); }
+.result-body pre {
+  background: rgba(0, 0, 0, 0.35); border: 1px solid var(--stroke); border-radius: 12px;
+  padding: 14px 16px; overflow-x: auto; font-size: 0.88rem; color: var(--text-1); white-space: pre-wrap;
+}
+.result-body img {
+  max-width: 100%; border-radius: 14px; border: 1px solid var(--stroke);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.result-note {
+  margin-top: 14px; padding: 11px 15px; border-radius: 11px; font-size: 0.83rem;
+  background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.25); color: var(--amber);
+}
+
+/* ---------- Modules ---------- */
+.modules-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 20px;
+}
+.module-card {
+  padding: 28px 26px; display: flex; flex-direction: column; gap: 12px;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+.module-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--stroke-hot);
+  box-shadow: var(--shadow-glow);
+}
+.module-icon {
+  width: 52px; height: 52px; border-radius: 15px; display: grid; place-items: center;
+  font-size: 1.5rem; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--stroke);
+}
+.i-cyan { box-shadow: inset 0 0 22px rgba(34, 211, 238, 0.22); }
+.i-violet { box-shadow: inset 0 0 22px rgba(168, 85, 247, 0.22); }
+.i-pink { box-shadow: inset 0 0 22px rgba(244, 114, 182, 0.22); }
+.i-amber { box-shadow: inset 0 0 22px rgba(251, 191, 36, 0.22); }
+.i-green { box-shadow: inset 0 0 22px rgba(52, 211, 153, 0.22); }
+.i-blue { box-shadow: inset 0 0 22px rgba(96, 165, 250, 0.22); }
+.module-card h3 { font-size: 1.12rem; }
+.module-card p { color: var(--text-1); font-size: 0.93rem; flex: 1; }
+.module-card:hover .btn-ghost { border-color: var(--stroke-hot); color: var(--cyan); }
+
+.module-zone { margin-top: 26px; overflow: hidden; }
+.module-zone-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 17px 22px; border-bottom: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.03);
+}
+.module-zone-head h3 { font-size: 1.05rem; color: var(--cyan); }
+.module-zone-body { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.mz-label { font-size: 0.82rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-2); margin-bottom: 5px; display: block; }
+.mz-input, .mz-textarea, .mz-select {
+  width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--stroke);
+  border-radius: 12px; padding: 13px 16px; color: var(--text-0);
+  font-family: var(--font-body); font-size: 0.95rem; outline: none;
+  transition: border-color 0.15s;
+}
+.mz-input:focus, .mz-textarea:focus, .mz-select:focus { border-color: var(--stroke-hot); }
+.mz-textarea { min-height: 110px; resize: vertical; }
+.mz-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.mz-row > * { flex: 1; min-width: 180px; }
+.mz-output {
+  background: rgba(0, 0, 0, 0.28); border: 1px solid var(--stroke); border-radius: 14px;
+  padding: 18px 20px; min-height: 80px;
+}
+.mz-output:empty { display: none; }
+.mz-loader { display: inline-flex; gap: 6px; align-items: center; color: var(--cyan); font-size: 0.9rem; }
+.mz-loader i {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); display: inline-block;
+  animation: bounce 1.1s infinite;
+}
+.mz-loader i:nth-child(2) { animation-delay: 0.15s; }
+.mz-loader i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-6px); opacity: 1; } }
+
+/* ---------- Chaînes ---------- */
+.chains-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.chain-card {
+  padding: 30px 27px; display: flex; flex-direction: column; gap: 13px;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s;
+}
+.chain-card:hover { transform: translateY(-6px); border-color: var(--stroke-hot); box-shadow: var(--shadow-glow); }
+.chain-tag {
+  align-self: flex-start; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--pink);
+  border: 1px solid rgba(244, 114, 182, 0.35); background: rgba(244, 114, 182, 0.09);
+  padding: 5px 12px; border-radius: 999px;
+}
+.chain-card h3 { font-size: 1.22rem; }
+.chain-card p { color: var(--text-1); font-size: 0.93rem; }
+.chain-steps-preview {
+  list-style: none; margin: 6px 0 10px; padding: 0;
+  display: flex; flex-direction: column; gap: 8px; flex: 1;
+}
+.chain-steps-preview li {
+  font-size: 0.87rem; color: var(--text-1);
+  padding-left: 26px; position: relative;
+}
+.chain-steps-preview li::before {
+  content: ""; position: absolute; left: 0; top: 5px;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: var(--grad-1); opacity: 0.85;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+}
+
+/* ---------- Méthode ---------- */
+.method-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 22px; }
+.method-card { padding: 30px 26px; }
+.method-num {
+  font-family: var(--font-display); font-size: 2.3rem; font-weight: 800;
+  background: var(--grad-2); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  margin-bottom: 10px;
+}
+.method-card h3 { font-size: 1.12rem; margin-bottom: 8px; }
+.method-card p { color: var(--text-1); font-size: 0.93rem; }
+.why { padding: 32px 30px; }
+.why h3 { font-size: 1.25rem; margin-bottom: 18px; }
+.why-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+.why-list li {
+  padding: 15px 18px; border-radius: 13px; font-size: 0.93rem; color: var(--text-1);
+  background: rgba(255, 255, 255, 0.035); border: 1px solid var(--stroke);
+}
+.why-list strong { color: var(--cyan); }
+
+/* ---------- CTA final ---------- */
+.cta-final { padding-top: 20px; }
+.cta-box {
+  text-align: center; padding: clamp(44px, 6vw, 80px) 28px;
+  background:
+    radial-gradient(600px 300px at 50% 0%, rgba(168, 85, 247, 0.18), transparent 70%),
+    var(--glass);
+  box-shadow: var(--shadow-glow);
+}
+.cta-box h2 { font-size: clamp(1.6rem, 3.6vw, 2.4rem); margin-bottom: 14px; }
+.cta-box p { color: var(--text-1); margin-bottom: 26px; }
+
+/* ---------- Footer ---------- */
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 52px clamp(18px, 5vw, 56px) 30px;
+  background: rgba(0, 0, 0, 0.25);
+}
+.footer-grid {
+  max-width: 1280px; margin: 0 auto 36px;
+  display: grid; grid-template-columns: 1.4fr 1fr 1.2fr; gap: 34px;
+}
+.footer-tag { color: var(--text-2); font-size: 0.92rem; margin-top: 12px; max-width: 34ch; }
+.footer h4 {
+  font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-2); margin-bottom: 14px; font-family: var(--font-body); font-weight: 700;
+}
+.footer-grid a { display: block; color: var(--text-1); text-decoration: none; margin-bottom: 9px; font-size: 0.93rem; }
+.footer-grid a:hover { color: var(--cyan); }
+.footer-tech { color: var(--text-1); font-size: 0.92rem; line-height: 1.8; }
+.footer-bottom {
+  max-width: 1280px; margin: 0 auto; padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;
+  color: var(--text-2); font-size: 0.85rem;
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; bottom: 26px; left: 50%; transform: translate(-50%, 20px);
+  background: rgba(15, 22, 38, 0.95); border: 1px solid var(--stroke-hot);
+  color: var(--text-0); padding: 13px 22px; border-radius: 13px;
+  font-size: 0.9rem; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 100;
+  box-shadow: var(--shadow-glow);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-visual { max-width: 560px; }
+  .footer-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; gap: 0;
+    background: rgba(8, 11, 20, 0.97); border-bottom: 1px solid var(--stroke);
+    padding: 10px 0;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 13px 22px; }
+  .nav-burger { display: flex; margin-left: auto; }
+  .nav .btn-primary { display: none; }
+  .command-bar { flex-direction: column; align-items: stretch; padding: 16px; }
+  .command-bar .btn { justify-content: center; }
+  .command-icon { display: none; }
+}
+
+</style>
 </head>
 <body>
   <!-- ====== Fond animé ====== -->
@@ -337,6 +807,797 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="assets/js/app.js"></script>
-</body>
+  <script>
+/* ============================================================
+   SYNAPSE — moteur du cockpit IA
+   Combine plusieurs moteurs IA gratuits (texte + image) :
+   - Texte  : Pollinations.ai Text  (gratuit, sans clé, CORS)
+   - Image  : Pollinations.ai Image (gratuit, sans clé)
+   Repli "mode démo" hors-ligne pour que le site reste testable.
+   ============================================================ */
+
+"use strict";
+
+/* ---------- Config moteurs IA gratuits ---------- */
+const AI = {
+  text: (prompt, system) => {
+    const url =
+      "https://text.pollinations.ai/" + encodeURIComponent(prompt) +
+      "?model=openai&seed=" + Math.floor(Math.random() * 1e6) +
+      (system ? "&system=" + encodeURIComponent(system) : "");
+    return fetchWithTimeout(url, { method: "GET" }, 45000).then((r) => {
+      if (!r.ok) throw new Error("text-api-" + r.status);
+      return r.text();
+    });
+  },
+  image: (prompt) => {
+    const url =
+      "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) +
+      "?width=1024&height=576&nologo=true&seed=" + Math.floor(Math.random() * 1e6);
+    return fetchWithTimeout(url, { method: "GET" }, 60000).then((r) => {
+      if (!r.ok) throw new Error("image-api-" + r.status);
+      return url; // renvoie l'URL de l'image générée
+    });
+  },
+};
+
+async function fetchWithTimeout(url, opts, ms) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { ...opts, signal: ctrl.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+const SYSTEM_BASE =
+  "Tu es SYNAPSE, un assistant IA francophone, ultra pratique, bienveillant et concis. " +
+  "Réponds toujours en français, en Markdown léger (titres avec ##, listes avec - ou 1.). " +
+  "Va droit au but : du contenu prêt à l'emploi, pas de remplissage.";
+
+/* ---------- Fallback hors-ligne (mode démo) ---------- */
+function mockAnswer(taskLabel, userText) {
+  const t = (userText || "").slice(0, 120);
+  const bank = {
+    planner:
+      "## Votre journée optimisée\n\n" +
+      "1. **08h30 – 09h15** · Bloc focus #1 : la tâche la plus importante (" + (t || "dossier prioritaire") + ")\n" +
+      "2. **09h15 – 09h30** · Pause active (marche, eau, respiration)\n" +
+      "3. **09h30 – 11h00** · Réunions / échanges (regroupés pour préserver votre énergie)\n" +
+      "4. **11h00 – 12h15** · Bloc focus #2 : production (rédaction, avancement)\n" +
+      "5. **14h00 – 15h30** · Tâches administratives et réponses rapides\n" +
+      "6. **15h30 – 16h30** · Bloc créatif : idées, améliorations, suivi\n" +
+      "7. **18h00** · Sport / décompression ✔\n\n" +
+      "## Règle d'or\nCommencez par la tâche qui vous fait le plus d'effet : votre énergie du matin est votre ressource la plus rare.\n\n" +
+      "> 🟡 Mode démo (site hors-ligne) — connecté à Internet, SYNAPSE génère un planning personnalisé à partir de vos contraintes réelles.",
+    writer:
+      "## Texte amélioré\n\n" +
+      "Voici une version fluidifiée, structurée et professionnelle de votre demande :\n\n" +
+      "**Objet :** Suivi de notre échange\n\n" +
+      "Bonjour,\n\n" +
+      "Je me permets de revenir vers vous concernant " + (t || "notre dernière discussion") + ". " +
+      "Afin de maintenir notre dynamique, je vous propose de fixer ensemble les prochaines étapes dès cette semaine.\n\n" +
+      "Je reste à votre disposition pour en échanger.\n\n" +
+      "Cordialement,\n\n" +
+      "## Variante courte\nUn message clair, poli et orienté action : une demande précise, une échéance, une porte ouverte au dialogue.\n\n" +
+      "> 🟡 Mode démo (site hors-ligne) — la version en ligne rédige exactement selon votre ton et votre contexte.",
+    ideas:
+      "## 10 idées actionnables\n\n" +
+      "1. **Le mythe du multitâche** — pourquoi votre cerveau préfère la monotâche\n" +
+      "2. **La règle des 2 minutes** appliquée à vos e-mails\n" +
+      "3. **Matin sans écran** : un protocole de 20 minutes\n" +
+      "4. **Liste de tâches anti-écrasante** : la méthode des 3 essentiels\n" +
+      "5. **Pauses intelligentes** : le rythme 52/17\n" +
+      "6. **Son environnement trahit ses priorités** (design d'espace)\n" +
+      "7. **Dire non** : 3 phrases prêtes à l'emploi\n" +
+      "8. **Automatiser l'ennuyeux** : 5 routines à mettre en place\n" +
+      "9. **Le bilan du vendredi** en 6 minutes\n" +
+      "10. **Productivité = énergie**, pas temps : dormir, bouger, respirer\n\n" +
+      "> 🟡 Mode démo (site hors-ligne) — la version en ligne personnalise les idées selon votre thème exact.",
+    decide:
+      "## Analyse de votre décision\n\n" +
+      "**Pour**\n- Avantage concret et rapide à obtenir\n- Aligné avec vos objectifs de long terme\n- Réversible : vous pourrez ajuster\n\n" +
+      "**Contre / risques**\n- Coût en temps ou en énergie à court terme\n- Incertitude sur un point clé\n\n" +
+      "**Recommandation**\nTestez la version la plus petite et réversible de cette décision cette semaine. Une décision testée vaut mieux qu'une décision imaginée.\n\n" +
+      "> 🟡 Mode démo (site hors-ligne) — la version en ligne analyse votre situation précise.",
+    chat:
+      "## Réponse\n\n" +
+      "Bonne question ! En mode démo hors-ligne, je vous donne une direction :\n\n" +
+      "- Clarifiez d'abord le résultat exact que vous visez\n" +
+      "- Découpez-le en 3 étapes maximales\n" +
+      "- Commencez par l'étape qui prend moins de 5 minutes\n\n" +
+      "> 🟡 Mode démo (site hors-ligne) — dès que le site est en ligne (GitHub Pages ou local avec Internet), je réponds à votre question exacte en direct.",
+    generic:
+      "## Suite à votre demande\n\n" +
+      "**" + (t || "Votre demande") + "**\n\n" +
+      "1. J'ai identifié votre objectif principal\n" +
+      "2. Voici un plan d'action simple : une première étape concrète aujourd'hui, une deuxième demain\n" +
+      "3. Résultat attendu : rapide, mesurable, prêt à l'emploi\n\n" +
+      "> 🟡 Mode démo (site hors-ligne) — la version en ligne traite votre demande avec un vrai moteur IA gratuit.",
+  };
+  return bank[taskLabel] || bank.generic;
+}
+
+/* ---------- Mini-rendu Markdown → HTML (sécurisé) ---------- */
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function mdToHtml(md) {
+  const lines = esc(md).split(/\r?\n/);
+  let html = "", inOl = false, inUl = false, inPre = false, para = [];
+  const flushPara = () => {
+    if (para.length) { html += "<p>" + para.join(" ") + "</p>"; para = []; }
+  };
+  const closeLists = () => {
+    if (inOl) { html += "</ol>"; inOl = false; }
+    if (inUl) { html += "</ul>"; inUl = false; }
+  };
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (line.startsWith("```")) {
+      flushPara(); closeLists();
+      if (!inPre) { html += "<pre>"; inPre = true; } else { html += "</pre>"; inPre = false; }
+      continue;
+    }
+    if (inPre) { html += raw + "\n"; continue; }
+    if (!line.trim()) { flushPara(); closeLists(); continue; }
+    const ol = line.match(/^(\d+)\.\s+(.*)/);
+    const ul = line.match(/^[-*]\s+(.*)/);
+    const h = line.match(/^(#{2,4})\s+(.*)/);
+    if (h) {
+      flushPara(); closeLists();
+      html += "<h4>" + inlineMd(h[2]) + "</h4>";
+    } else if (ol) {
+      flushPara();
+      if (!inUl === false) { html += "</ul>"; inUl = false; }
+      if (!inOl) { html += "<ol>"; inOl = true; }
+      html += "<li>" + inlineMd(ol[2]) + "</li>";
+    } else if (ul) {
+      flushPara();
+      if (inOl) { html += "</ol>"; inOl = false; }
+      if (!inUl) { html += "<ul>"; inUl = true; }
+      html += "<li>" + inlineMd(ul[1]) + "</li>";
+    } else if (line.startsWith("&gt;")) {
+      flushPara(); closeLists();
+      html += '<div class="result-note">' + inlineMd(line.replace(/^&gt;\s*/, "")) + "</div>";
+    } else if (/^---+$/.test(line.trim())) {
+      flushPara(); closeLists();
+    } else {
+      para.push(inlineMd(line));
+    }
+  }
+  flushPara(); closeLists();
+  if (inPre) html += "</pre>";
+  return html;
+}
+function inlineMd(s) {
+  return s
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/`(.+?)`/g, "<code>$1</code>");
+}
+
+/* ---------- Toast ---------- */
+const toastEl = document.getElementById("toast");
+let toastTimer = null;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2600);
+}
+
+/* ---------- Canvas réseau neuronal ---------- */
+(function neuralCanvas() {
+  const canvas = document.getElementById("neural-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  let w, h, pts = [];
+  const COUNT = 46;
+
+  function resize() {
+    w = canvas.width = canvas.offsetWidth;
+    h = canvas.height = canvas.offsetHeight;
+    pts = Array.from({ length: COUNT }, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+    }));
+  }
+  function tick() {
+    ctx.clearRect(0, 0, w, h);
+    for (const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(34, 211, 238, 0.7)";
+      ctx.fill();
+    }
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 130) {
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.strokeStyle = "rgba(168, 85, 247, " + (0.22 * (1 - d / 130)).toFixed(3) + ")";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+  tick();
+})();
+
+/* ---------- Typewriter hero ---------- */
+(function typewriter() {
+  const el = document.getElementById("typewriter");
+  if (!el) return;
+  const phrases = [
+    "Planifie ma journée en 3 blocs focus…",
+    "Rédige un post LinkedIn sur la concentration…",
+    "Génère un visuel de ville solaire…",
+    "Découpe mon rapport en micro-étapes…",
+  ];
+  let pi = 0, ci = 0, deleting = false;
+  (function step() {
+    const phrase = phrases[pi];
+    el.textContent = phrase.slice(0, ci);
+    if (!deleting && ci < phrase.length) { ci++; setTimeout(step, 34); }
+    else if (!deleting) { deleting = true; setTimeout(step, 1700); }
+    else if (ci > 0) { ci--; setTimeout(step, 16); }
+    else { deleting = false; pi = (pi + 1) % phrases.length; setTimeout(step, 320); }
+  })();
+})();
+
+/* ---------- Navigation mobile ---------- */
+(function nav() {
+  const burger = document.getElementById("nav-burger");
+  const links = document.querySelector(".nav-links");
+  if (!burger || !links) return;
+  burger.addEventListener("click", () => {
+    const open = links.classList.toggle("open");
+    burger.setAttribute("aria-expanded", String(open));
+  });
+  links.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", () => links.classList.remove("open"))
+  );
+})();
+
+/* ============================================================
+   COMMANDE UNIVERSELLE — détection d'intention + routage
+   ============================================================ */
+const INTENTS = [
+  {
+    id: "planner",
+    keywords: ["planif", "planning", "journée", "journee", "agenda", "organis", "emploi du temps", "routine", "matin"],
+    label: "planner",
+    buildPrompt: (t) =>
+      SYSTEM_BASE + "\n\nCrée un planning de journée réaliste et priorisé à partir de ces éléments : " + t +
+      ". Format : horaires, blocs de travail, pauses, priorités numérotées, et 1 conseil d'énergie.",
+  },
+  {
+    id: "writer",
+    keywords: ["rédig", "redig", "écris", "ecris", "ecrire", "écrire", "mail", "e-mail", "message", "post", "article", "texte", "lettre", "relance", "résume", "resume", "résum", "resum", "traduis", "améliore", "ameliore", "corrige"],
+    label: "writer",
+    buildPrompt: (t) =>
+      SYSTEM_BASE + "\n\nRédige / traite cette demande d'écriture avec un résultat directement utilisable : " + t,
+  },
+  {
+    id: "visual",
+    keywords: ["visuel", "image", "illustration", "photo", "logo", "affiche", "dessine", "génère une image", "genere une image", "génère un visuel"],
+    label: "visual",
+    buildPrompt: (t) => "Style artistique soigné, haute qualité, sans texte : " + t.replace(/^(crée|cree|génère|genere|fais)\s+(un|une)?\s*/i, ""),
+  },
+  {
+    id: "ideas",
+    keywords: ["idée", "idee", "idées", "idees", "brainstorm", "inspire", "suggestion", "trouve des", "propose"],
+    label: "ideas",
+    buildPrompt: (t) =>
+      SYSTEM_BASE + "\n\nPropose 10 idées concrètes et originales, prêtes à l'emploi (pas de généralités) sur : " + t,
+  },
+  {
+    id: "decide",
+    keywords: ["décision", "decision", "décider", "decider", "choix", "choisir", "arbitrage", "hésite", "hesite", "pour ou contre", "avantages"],
+    label: "decide",
+    buildPrompt: (t) =>
+      SYSTEM_BASE + "\n\nAide à la décision sur cette situation : " + t +
+      ". Format : Pour / Contre-risques / Analyse courte / Recommandation finale claire.",
+  },
+  {
+    id: "chat",
+    keywords: ["comment", "pourquoi", "quel", "quelle", "peux-tu", "peux tu", "explique", "conseil", "aide"],
+    label: "chat",
+    buildPrompt: (t) => SYSTEM_BASE + "\n\nQuestion / demande : " + t,
+  },
+];
+
+function detectIntent(text) {
+  const t = text.toLowerCase();
+  let best = null, bestScore = 0;
+  for (const intent of INTENTS) {
+    let score = 0;
+    for (const kw of intent.keywords) if (t.includes(kw)) score++;
+    if (score > bestScore) { bestScore = score; best = intent; }
+  }
+  return bestScore > 0 ? best : INTENTS[INTENTS.length - 1]; // défaut : chat
+}
+
+/* ---------- Panneau de résultat ---------- */
+const resultPanel = document.getElementById("result-panel");
+const resultBody = document.getElementById("result-body");
+const resultStatusText = document.getElementById("result-status-text");
+const resultSteps = document.getElementById("result-steps");
+
+function showResult() {
+  resultPanel.hidden = false;
+  resultBody.innerHTML = "";
+  resultSteps.hidden = true;
+  resultSteps.innerHTML = "";
+  resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+function setStatus(txt) { resultStatusText.textContent = txt; }
+
+function runSteps(steps) {
+  // steps : [{label, run: async () => htmlFragment}]
+  resultSteps.hidden = false;
+  resultSteps.innerHTML = steps
+    .map((s, i) => `<li id="step-${i}"><span class="step-ico">○</span><span>${esc(s.label)}</span></li>`)
+    .join("");
+  return steps.reduce(
+    (chain, step, i) =>
+      chain.then(async (acc) => {
+        const li = document.getElementById("step-" + i);
+        li.classList.add("running");
+        setStatus(step.label + "…");
+        const out = await step.run(acc);
+        li.classList.remove("running");
+        li.classList.add("done");
+        li.querySelector(".step-ico").textContent = "✓";
+        return acc + out;
+      }),
+    Promise.resolve("")
+  );
+}
+
+async function askText(prompt, fallbackKey, userText) {
+  try {
+    return await AI.text(prompt);
+  } catch (e) {
+    console.warn("Moteur texte indisponible, mode démo :", e);
+    return mockAnswer(fallbackKey, userText);
+  }
+}
+
+/* ---------- Commande universelle ---------- */
+const commandInput = document.getElementById("command-input");
+const commandRun = document.getElementById("command-run");
+
+async function executeCommand(text) {
+  const cmd = (text || "").trim();
+  if (!cmd) {
+    toast("Décrivez votre besoin — ex. : « planifie ma journée »");
+    commandInput.focus();
+    return;
+  }
+  showResult();
+  setStatus("Analyse de votre demande…");
+  commandRun.disabled = true;
+
+  const intent = detectIntent(cmd);
+
+  if (intent.id === "visual") {
+    await runSteps([
+      {
+        label: "Interprétation de votre idée visuelle",
+        run: async () => {
+          const html = "<p>Je prépare une image à partir de : <strong>" + esc(cmd) + "</strong></p>";
+          return html;
+        },
+      },
+      {
+        label: "Génération de l'image (moteur IA image gratuit)",
+        run: async () => {
+          try {
+            const url = await AI.image(intent.buildPrompt(cmd));
+            return (
+              '<p><strong>Visuel généré :</strong></p>' +
+              '<img src="' + url + '" alt="Visuel généré par IA" loading="lazy" />' +
+              "<p><em>Astuce : clic droit → « Enregistrer l'image » pour la conserver.</em></p>"
+            );
+          } catch (e) {
+            return (
+              "<p>Le moteur d'image est momentanément indisponible. Réessayez dans quelques secondes, " +
+              "ou lancez la commande depuis une connexion Internet active.</p>" +
+              '<div class="result-note">Mode démo : image non générée hors-ligne.</div>'
+            );
+          }
+        },
+      },
+    ]);
+  } else if (intent.id === "planner") {
+    await runSteps([
+      { label: "Extraction de vos contraintes", run: async () => "<p>Contraintes détectées : <strong>" + esc(cmd) + "</strong></p>" },
+      {
+        label: "Priorisation & optimisation de l'énergie",
+        run: async () => "",
+      },
+      {
+        label: "Génération du planning",
+        run: async (acc) => {
+          const answer = await askText(intent.buildPrompt(cmd), "planner", cmd);
+          return mdToHtml(answer);
+        },
+      },
+    ]);
+  } else {
+    await runSteps([
+      { label: "Compréhension de la demande", run: async () => "<p>Demande détectée (module <strong>" + esc(intent.id) + "</strong>) : « " + esc(cmd) + " »</p>" },
+      {
+        label: "Génération par le moteur IA gratuit",
+        run: async () => {
+          const answer = await askText(intent.buildPrompt(cmd), intent.label, cmd);
+          return mdToHtml(answer);
+        },
+      },
+    ]);
+  }
+
+  setStatus("✓ Terminé — résultat prêt à l'emploi");
+  commandRun.disabled = false;
+  saveHistory(cmd);
+}
+
+commandRun.addEventListener("click", () => executeCommand(commandInput.value));
+commandInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") executeCommand(commandInput.value);
+});
+
+/* ---------- Chips d'exemples ---------- */
+document.getElementById("example-chips").addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  commandInput.value = chip.dataset.cmd || chip.textContent.trim();
+  executeCommand(commandInput.value);
+});
+
+/* ---------- Actions résultat ---------- */
+document.getElementById("result-copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(resultBody.innerText);
+    toast("Résultat copié dans le presse-papiers ✓");
+  } catch {
+    toast("Copie impossible dans ce contexte");
+  }
+});
+document.getElementById("result-close").addEventListener("click", () => {
+  resultPanel.hidden = true;
+});
+
+/* ---------- Historique local (privé, navigateur) ---------- */
+function saveHistory(cmd) {
+  try {
+    const h = JSON.parse(localStorage.getItem("synapse-history") || "[]");
+    h.unshift({ cmd, at: Date.now() });
+    localStorage.setItem("synapse-history", JSON.stringify(h.slice(0, 25)));
+  } catch { /* stockage indisponible */ }
+}
+
+/* ============================================================
+   MODULES
+   ============================================================ */
+const moduleZone = document.getElementById("module-zone");
+const moduleZoneBody = document.getElementById("module-zone-body");
+const moduleZoneTitle = document.getElementById("module-zone-title");
+const moduleZoneClose = document.getElementById("module-zone-close");
+
+moduleZoneClose.addEventListener("click", () => (moduleZone.hidden = true));
+
+function loaderHtml() {
+  return '<div class="mz-loader"><i></i><i></i><i></i> L\'IA réfléchit…</div>';
+}
+function runModuleTask(outEl, prompt, fallbackKey, userText) {
+  outEl.innerHTML = loaderHtml();
+  askText(prompt, fallbackKey, userText).then((answer) => {
+    outEl.innerHTML = mdToHtml(answer);
+    toast("Réponse générée ✓");
+  });
+}
+
+const MODULES = {
+  planner: {
+    title: "📅 Plan du jour IA",
+    render() {
+      return `
+        <div class="mz-row">
+          <div><label class="mz-label">Vos tâches du jour</label>
+            <textarea class="mz-textarea" id="mp-tasks" placeholder="Ex. : rédiger le rapport, 2 réunions, appeler le client X, sport à 18h…"></textarea></div>
+        </div>
+        <div class="mz-row">
+          <div><label class="mz-label">Niveau d'énergie</label>
+            <select class="mz-select" id="mp-energy">
+              <option>Élevée (nuit réparatrice)</option>
+              <option>Moyenne (normal)</option>
+              <option>Faible (fatigué)</option>
+            </select></div>
+          <div><label class="mz-label">Contrainte principale</label>
+            <input class="mz-input" id="mp-constraint" placeholder="Ex. : finir à 17h, pause déjeuner 1h…" /></div>
+        </div>
+        <button class="btn btn-primary" id="mp-run">Générer mon planning</button>
+        <div class="mz-output" id="mp-out"></div>`;
+    },
+    bind() {
+      document.getElementById("mp-run").addEventListener("click", () => {
+        const tasks = document.getElementById("mp-tasks").value;
+        const energy = document.getElementById("mp-energy").value;
+        const constraint = document.getElementById("mp-constraint").value;
+        const prompt =
+          SYSTEM_BASE +
+          "\n\nCrée un planning de journée réaliste. Tâches : " + (tasks || "(à deviner : journée de travail classique)") +
+          ". Énergie : " + energy + ". Contrainte : " + (constraint || "aucune") +
+          ". Format : créneaux horaires, blocs prioritaires, pauses, 1 conseil d'énergie.";
+        runModuleTask(document.getElementById("mp-out"), prompt, "planner", tasks);
+      });
+    },
+  },
+  writer: {
+    title: "✍️ Studio d'écriture",
+    render() {
+      return `
+        <div class="mz-row">
+          <div><label class="mz-label">Action</label>
+            <select class="mz-select" id="wr-mode">
+              <option value="améliore et rend professionnel">Améliorer un texte</option>
+              <option value="résume en 5 points clés">Résumer</option>
+              <option value="traduis en anglais naturel">Traduire (→ anglais)</option>
+              <option value="rédige un mail complet sur la base de">Rédiger un mail</option>
+              <option value="débloque ma page blanche sur le sujet">Débloquer la page blanche</option>
+            </select></div>
+        </div>
+        <div><label class="mz-label">Votre matière première</label>
+          <textarea class="mz-textarea" id="wr-text" placeholder="Collez votre texte, votre brief, vos idées brutes…"></textarea></div>
+        <div><label class="mz-label">Ton souhaité (optionnel)</label>
+          <input class="mz-input" id="wr-tone" placeholder="Ex. : professionnel et chaleureux, percutant, simple…" /></div>
+        <button class="btn btn-primary" id="wr-run">Lancer le studio</button>
+        <div class="mz-output" id="wr-out"></div>`;
+    },
+    bind() {
+      document.getElementById("wr-run").addEventListener("click", () => {
+        const mode = document.getElementById("wr-mode").value;
+        const text = document.getElementById("wr-text").value;
+        const tone = document.getElementById("wr-tone").value;
+        const prompt = SYSTEM_BASE + "\n\n" + mode + " le contenu suivant. Ton : " + (tone || "naturel et efficace") + ".\n\n" + (text || "(génère un exemple pertinent)");
+        runModuleTask(document.getElementById("wr-out"), prompt, "writer", text);
+      });
+    },
+  },
+  visual: {
+    title: "🎨 Visuel IA",
+    render() {
+      return `
+        <div><label class="mz-label">Décrivez l'image de vos rêves</label>
+          <input class="mz-input" id="vi-prompt" placeholder="Ex. : ville solaire futuriste au coucher du soleil, style concept art…" /></div>
+        <button class="btn btn-primary" id="vi-run">Générer le visuel</button>
+        <div class="mz-output" id="vi-out"></div>`;
+    },
+    bind() {
+      document.getElementById("vi-run").addEventListener("click", () => {
+        const p = document.getElementById("vi-prompt").value.trim();
+        const out = document.getElementById("vi-out");
+        if (!p) { toast("Décrivez d'abord votre image"); return; }
+        out.innerHTML = loaderHtml();
+        AI.image("high quality digital art, cinematic lighting, detailed: " + p)
+          .then((url) => {
+            out.innerHTML =
+              '<img src="' + url + '" alt="Visuel IA" loading="lazy" />' +
+              "<p><em>Clic droit → Enregistrer l'image pour la conserver.</em></p>";
+            toast("Visuel généré ✓");
+          })
+          .catch(() => {
+            out.innerHTML =
+              "<p>Moteur d'image indisponible (hors-ligne ?). Réessayez avec une connexion Internet.</p>" +
+              '<div class="result-note">Mode démo : aucune image générée.</div>';
+          });
+      });
+    },
+  },
+  ideas: {
+    title: "💡 Idées express",
+    render() {
+      return `
+        <div><label class="mz-label">Sur quel thème ?</label>
+          <input class="mz-input" id="id-theme" placeholder="Ex. : contenus sur la productivité, repas du soir, cadeaux, projets perso…" /></div>
+        <button class="btn btn-primary" id="id-run">Générer 10 idées</button>
+        <div class="mz-output" id="id-out"></div>`;
+    },
+    bind() {
+      document.getElementById("id-run").addEventListener("click", () => {
+        const theme = document.getElementById("id-theme").value;
+        const prompt = SYSTEM_BASE + "\n\nPropose 10 idées concrètes, originales et actionnables (avec un angle précis pour chacune) sur : " + (theme || "la productivité quotidienne");
+        runModuleTask(document.getElementById("id-out"), prompt, "ideas", theme);
+      });
+    },
+  },
+  decide: {
+    title: "⚖️ Aide à la décision",
+    render() {
+      return `
+        <div><label class="mz-label">Décrivez votre situation</label>
+          <textarea class="mz-textarea" id="de-sit" placeholder="Ex. : hésiter entre deux offres, lancer un projet, déménager…"></textarea></div>
+        <button class="btn btn-primary" id="de-run">Analyser ma décision</button>
+        <div class="mz-output" id="de-out"></div>`;
+    },
+    bind() {
+      document.getElementById("de-run").addEventListener("click", () => {
+        const sit = document.getElementById("de-sit").value;
+        const prompt = SYSTEM_BASE + "\n\nAide à la décision. Situation : " + (sit || "(situation générique)") + ". Format : Pour / Contre & risques / Analyse / Recommandation claire.";
+        runModuleTask(document.getElementById("de-out"), prompt, "decide", sit);
+      });
+    },
+  },
+  chat: {
+    title: "💬 Assistant libre",
+    render() {
+      return `
+        <div><label class="mz-label">Votre question</label>
+          <textarea class="mz-textarea" id="ch-q" placeholder="Posez n'importe quelle question…"></textarea></div>
+        <button class="btn btn-primary" id="ch-run">Demander à l'IA</button>
+        <div class="mz-output" id="ch-out"></div>`;
+    },
+    bind() {
+      document.getElementById("ch-run").addEventListener("click", () => {
+        const q = document.getElementById("ch-q").value;
+        if (!q.trim()) { toast("Posez d'abord votre question"); return; }
+        runModuleTask(document.getElementById("ch-out"), SYSTEM_BASE + "\n\n" + q, "chat", q);
+      });
+    },
+  },
+};
+
+document.getElementById("modules").addEventListener("click", (e) => {
+  const card = e.target.closest(".module-card");
+  if (!card) return;
+  const mod = MODULES[card.dataset.module];
+  if (!mod) return;
+  moduleZone.hidden = false;
+  moduleZoneTitle.textContent = mod.title;
+  moduleZoneBody.innerHTML = mod.render();
+  mod.bind();
+  moduleZone.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+
+/* ============================================================
+   CHAÎNES IA — plusieurs outils qui travaillent ensemble
+   ============================================================ */
+const CHAINS = {
+  morning: {
+    title: "🌅 Chaîne « Matinée laser »",
+    steps: [
+      {
+        label: "Priorisation intelligente",
+        run: (input) =>
+          askText(
+            SYSTEM_BASE + "\n\nPriorise ces tâches (méthode impact/effort) et explique en 1 ligne pourquoi : " + input,
+            "planner", input
+          ).then((a) => "<h4>1 · Priorités</h4>" + mdToHtml(a)),
+      },
+      {
+        label: "Construction du planning minuté",
+        run: (input) =>
+          askText(
+            SYSTEM_BASE + "\n\nÀ partir de ces priorités, construis une matinée minutée (9h-13h) avec blocs focus et pauses : " + input.slice(0, 1200),
+            "planner", input
+          ).then((a) => "<h4>2 · Planning</h4>" + mdToHtml(a)),
+      },
+      {
+        label: "Rédaction du message d'équipe",
+        run: (input) =>
+          askText(
+            SYSTEM_BASE + "\n\nRédige un court message d'équipe (3 phrases max) présentant les priorités du matin, ton positif et fédérateur, basé sur : " + input.slice(0, 1200),
+            "writer", input
+          ).then((a) => "<h4>3 · Message prêt à envoyer</h4>" + mdToHtml(a)),
+      },
+    ],
+    ask: "Listez vos tâches du jour (une par ligne ou en vrac) :",
+  },
+  content: {
+    title: "🚀 Chaîne « Machine à contenu »",
+    steps: [
+      {
+        label: "Angles & accroches",
+        run: (input) =>
+          askText(
+            SYSTEM_BASE + "\n\nPropose 3 angles de contenu percutants puis choisis le meilleur et écris 2 accroches pour : " + input,
+            "ideas", input
+          ).then((a) => "<h4>1 · Angle & accroches</h4>" + mdToHtml(a)),
+      },
+      {
+        label: "Développement du post complet",
+        run: (input) =>
+          askText(
+            SYSTEM_BASE + "\n\nDéveloppe un post complet (150-250 mots) percutant et structuré, basé sur ce qui précède : " + input.slice(0, 1500),
+            "writer", input
+          ).then((a) => "<h4>2 · Post</h4>" + mdToHtml(a)),
+      },
+      {
+        label: "Visuel généré pour le post",
+        run: async (input) => {
+          try {
+            const url = await AI.image("modern editorial illustration, vibrant gradient background, abstract, high quality: " + input.slice(0, 200));
+            return "<h4>3 · Visuel</h4><img src='" + url + "' alt='Visuel du post' loading='lazy' />";
+          } catch {
+            return "<h4>3 · Visuel</h4><div class='result-note'>Moteur image indisponible hors-ligne — le visuel sera généré en ligne.</div>";
+          }
+        },
+      },
+    ],
+    ask: "Quel est le sujet de votre contenu ?",
+  },
+  focus: {
+    title: "🎯 Chaîne « Anti-procrastination »",
+    steps: [
+      {
+        label: "Découpage en micro-étapes",
+        run: (input) =>
+          askText(
+            SYSTEM_BASE + "\n\nDécoupe cette tâche repoussée en micro-étapes de 5 à 15 minutes, ultra concrètes : " + input,
+            "planner", input
+          ).then((a) => "<h4>1 · Micro-étapes</h4>" + mdToHtml(a)),
+      },
+      {
+        label: "Première étape de 5 minutes",
+        run: (input) =>
+          askText(
+            SYSTEM_BASE + "\n\nIdentifie LA première action de 5 minutes exactement (physique, concrète) pour démarrer, à partir de : " + input.slice(0, 1200),
+            "decide", input
+          ).then((a) => "<h4>2 · L'élan</h4>" + mdToHtml(a)),
+      },
+      {
+        label: "Message de mise en action",
+        run: (input) =>
+          askText(
+            SYSTEM_BASE + "\n\nÉcris un court message de motivation direct et bienveillant (5 lignes max) pour mettre en action immédiatement, basé sur : " + input.slice(0, 1200),
+            "writer", input
+          ).then((a) => "<h4>3 · Boost</h4>" + mdToHtml(a)),
+      },
+    ],
+    ask: "Quelle est cette tâche que vous repoussez ?",
+  },
+};
+
+document.getElementById("chaines").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".chain-run");
+  if (!btn) return;
+  const chain = CHAINS[btn.dataset.chain];
+  if (!chain) return;
+
+  const input = window.prompt(chain.ask + "\n\n(votre réponse alimente les 3 étapes de la chaîne)");
+  if (!input || !input.trim()) return;
+
+  showResult();
+  setStatus(chain.title + " — démarrage…");
+  btn.disabled = true;
+
+  await runSteps(
+    chain.steps.map((s) => ({
+      label: s.label,
+      run: (acc) => s.run(acc ? acc + "\n\nContexte: " + input : input),
+    }))
+  );
+
+  setStatus("✓ Chaîne terminée — 3 outils IA combinés pour vous");
+  btn.disabled = false;
+  saveHistory("chaîne: " + chain.title + " — " + input);
+});
+
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a48e4bd63c610062',t:'MTc5MTcyNjIzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
