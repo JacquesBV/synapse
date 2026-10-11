@@ -290,6 +290,8 @@ h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin-bottom: 0.8rem; }
 .result-body ul, .result-body ol { margin: 0 0 0.9rem 1.25rem; color: var(--text-1); }
 .result-body li { margin-bottom: 0.35rem; }
 .result-body strong { color: var(--text-0); }
+.result-body a { color: var(--cyan); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.result-body img { display: block; margin: 10px 0; }
 .result-body pre {
   background: rgba(0, 0, 0, 0.35); border: 1px solid var(--stroke); border-radius: 12px;
   padding: 14px 16px; overflow-x: auto; font-size: 0.88rem; color: var(--text-1); white-space: pre-wrap;
@@ -830,15 +832,11 @@ const AI = {
       return r.text();
     });
   },
-  image: (prompt) => {
-    const url =
-      "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) +
-      "?width=1024&height=576&nologo=true&seed=" + Math.floor(Math.random() * 1e6);
-    return fetchWithTimeout(url, { method: "GET" }, 60000).then((r) => {
-      if (!r.ok) throw new Error("image-api-" + r.status);
-      return url; // renvoie l'URL de l'image générée
-    });
-  },
+  imageURL: (prompt) =>
+    "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) +
+    "?width=1024&height=576&nologo=true&seed=" + Math.floor(Math.random() * 1e6),
+  // Préchargement via balise <img> : bien plus fiable que fetch() sur mobile
+  image: (prompt) => preloadImage(AI.imageURL(prompt), 90000),
 };
 
 async function fetchWithTimeout(url, opts, ms) {
@@ -849,6 +847,19 @@ async function fetchWithTimeout(url, opts, ms) {
   } finally {
     clearTimeout(t);
   }
+}
+
+function preloadImage(url, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const timer = setTimeout(() => {
+      img.onload = img.onerror = null;
+      reject(new Error("timeout"));
+    }, timeoutMs || 60000);
+    img.onload = () => { clearTimeout(timer); resolve(url); };
+    img.onerror = () => { clearTimeout(timer); reject(new Error("load-error")); };
+    img.src = url;
+  });
 }
 
 const SYSTEM_BASE =
@@ -1146,23 +1157,40 @@ function showResult() {
 }
 function setStatus(txt) { resultStatusText.textContent = txt; }
 
+function renderResult(html) {
+  resultBody.innerHTML = html;
+}
+
 function runSteps(steps) {
-  // steps : [{label, run: async () => htmlFragment}]
+  // steps : [{label, run: async (prev) => htmlFragment | {html, raw}}]
+  // prev.html = rendu accumulé, prev.raw = textes bruts (pour nourrir l'étape suivante)
   resultSteps.hidden = false;
   resultSteps.innerHTML = steps
     .map((s, i) => `<li id="step-${i}"><span class="step-ico">○</span><span>${esc(s.label)}</span></li>`)
     .join("");
+  let htmlAcc = "", rawAcc = "";
   return steps.reduce(
     (chain, step, i) =>
-      chain.then(async (acc) => {
+      chain.then(async () => {
         const li = document.getElementById("step-" + i);
         li.classList.add("running");
         setStatus(step.label + "…");
-        const out = await step.run(acc);
+        let out;
+        try {
+          out = await step.run({ html: htmlAcc, raw: rawAcc });
+        } catch (e) {
+          console.warn("Étape interrompue :", e);
+          out = '<div class="result-note">⚠️ Étape « ' + esc(step.label) +
+            ' » interrompue (' + esc(e.message || "erreur temporaire") + ") — la suite continue.</div>";
+        }
+        const res = typeof out === "string" ? { html: out, raw: "" } : (out || { html: "", raw: "" });
+        htmlAcc += res.html || "";
+        rawAcc += res.raw ? res.raw + "\n\n" : "";
+        renderResult(htmlAcc); // ★ LE FIX : le résultat s'affiche au fur et à mesure
         li.classList.remove("running");
         li.classList.add("done");
         li.querySelector(".step-ico").textContent = "✓";
-        return acc + out;
+        return htmlAcc;
       }),
     Promise.resolve("")
   );
@@ -1198,54 +1226,71 @@ async function executeCommand(text) {
     await runSteps([
       {
         label: "Interprétation de votre idée visuelle",
-        run: async () => {
-          const html = "<p>Je prépare une image à partir de : <strong>" + esc(cmd) + "</strong></p>";
-          return html;
-        },
+        run: async () => ({
+          html: "<p>Je prépare une image à partir de : <strong>" + esc(cmd) + "</strong></p>",
+          raw: cmd,
+        }),
       },
       {
-        label: "Génération de l'image (moteur IA image gratuit)",
+        label: "Génération de l'image (comptez 10 à 30 s…)",
         run: async () => {
           try {
             const url = await AI.image(intent.buildPrompt(cmd));
-            return (
-              '<p><strong>Visuel généré :</strong></p>' +
-              '<img src="' + url + '" alt="Visuel généré par IA" loading="lazy" />' +
-              "<p><em>Astuce : clic droit → « Enregistrer l'image » pour la conserver.</em></p>"
-            );
+            return {
+              html:
+                "<p><strong>Visuel généré :</strong></p>" +
+                '<p><img src="' + esc(url) + '" alt="Visuel généré par IA" /></p>' +
+                '<p><a href="' + esc(url) + '" target="_blank" rel="noopener">🔗 Ouvrir le visuel en grand</a>' +
+                " — <em>sur mobile : appui long sur l'image pour l'enregistrer.</em></p>",
+              raw: "Visuel généré : " + url,
+            };
           } catch (e) {
-            return (
-              "<p>Le moteur d'image est momentanément indisponible. Réessayez dans quelques secondes, " +
-              "ou lancez la commande depuis une connexion Internet active.</p>" +
-              '<div class="result-note">Mode démo : image non générée hors-ligne.</div>'
-            );
+            return {
+              html:
+                "<p>Le moteur d'image est momentanément saturé (service gratuit). " +
+                "Réessayez dans un instant, ou reformulez légèrement votre idée.</p>" +
+                '<div class="result-note">Astuce : les visuels marchent mieux avec une description concrète (style, couleurs, ambiance, lumière).</div>',
+              raw: "",
+            };
           }
         },
       },
     ]);
   } else if (intent.id === "planner") {
     await runSteps([
-      { label: "Extraction de vos contraintes", run: async () => "<p>Contraintes détectées : <strong>" + esc(cmd) + "</strong></p>" },
+      {
+        label: "Extraction de vos contraintes",
+        run: async () => ({
+          html: "<p>Contraintes détectées : <strong>" + esc(cmd) + "</strong></p>",
+          raw: cmd,
+        }),
+      },
       {
         label: "Priorisation & optimisation de l'énergie",
         run: async () => "",
       },
       {
         label: "Génération du planning",
-        run: async (acc) => {
-          const answer = await askText(intent.buildPrompt(cmd), "planner", cmd);
-          return mdToHtml(answer);
+        run: async (prev) => {
+          const answer = await askText(intent.buildPrompt(prev.raw || cmd), "planner", cmd);
+          return { html: mdToHtml(answer), raw: answer };
         },
       },
     ]);
   } else {
     await runSteps([
-      { label: "Compréhension de la demande", run: async () => "<p>Demande détectée (module <strong>" + esc(intent.id) + "</strong>) : « " + esc(cmd) + " »</p>" },
+      {
+        label: "Compréhension de la demande",
+        run: async () => ({
+          html: "<p>Demande détectée (module <strong>" + esc(intent.id) + "</strong>) : « " + esc(cmd) + " »</p>",
+          raw: cmd,
+        }),
+      },
       {
         label: "Génération par le moteur IA gratuit",
-        run: async () => {
-          const answer = await askText(intent.buildPrompt(cmd), intent.label, cmd);
-          return mdToHtml(answer);
+        run: async (prev) => {
+          const answer = await askText(intent.buildPrompt(prev.raw || cmd), intent.label, cmd);
+          return { html: mdToHtml(answer), raw: answer };
         },
       },
     ]);
@@ -1483,27 +1528,27 @@ const CHAINS = {
     steps: [
       {
         label: "Priorisation intelligente",
-        run: (input) =>
+        run: (input, prevRaw) =>
           askText(
-            SYSTEM_BASE + "\n\nPriorise ces tâches (méthode impact/effort) et explique en 1 ligne pourquoi : " + input,
+            SYSTEM_BASE + "\n\nPriorise ces tâches (méthode impact/effort) et explique en 1 ligne pourquoi : " + (prevRaw || input),
             "planner", input
-          ).then((a) => "<h4>1 · Priorités</h4>" + mdToHtml(a)),
+          ).then((a) => ({ html: "<h4>1 · Priorités</h4>" + mdToHtml(a), raw: a })),
       },
       {
         label: "Construction du planning minuté",
-        run: (input) =>
+        run: (input, prevRaw) =>
           askText(
-            SYSTEM_BASE + "\n\nÀ partir de ces priorités, construis une matinée minutée (9h-13h) avec blocs focus et pauses : " + input.slice(0, 1200),
+            SYSTEM_BASE + "\n\nÀ partir de ces priorités, construis une matinée minutée (9h-13h) avec blocs focus et pauses.\n\nTâches : " + input.slice(0, 800) + "\n\nPriorités identifiées :\n" + (prevRaw || "").slice(0, 1200),
             "planner", input
-          ).then((a) => "<h4>2 · Planning</h4>" + mdToHtml(a)),
+          ).then((a) => ({ html: "<h4>2 · Planning</h4>" + mdToHtml(a), raw: a })),
       },
       {
         label: "Rédaction du message d'équipe",
-        run: (input) =>
+        run: (input, prevRaw) =>
           askText(
-            SYSTEM_BASE + "\n\nRédige un court message d'équipe (3 phrases max) présentant les priorités du matin, ton positif et fédérateur, basé sur : " + input.slice(0, 1200),
+            SYSTEM_BASE + "\n\nRédige un court message d'équipe (3 phrases max) présentant les priorités du matin, ton positif et fédérateur, basé sur :\n" + (prevRaw || input).slice(0, 1200),
             "writer", input
-          ).then((a) => "<h4>3 · Message prêt à envoyer</h4>" + mdToHtml(a)),
+          ).then((a) => ({ html: "<h4>3 · Message prêt à envoyer</h4>" + mdToHtml(a), raw: a })),
       },
     ],
     ask: "Listez vos tâches du jour (une par ligne ou en vrac) :",
@@ -1513,28 +1558,36 @@ const CHAINS = {
     steps: [
       {
         label: "Angles & accroches",
-        run: (input) =>
+        run: (input, prevRaw) =>
           askText(
-            SYSTEM_BASE + "\n\nPropose 3 angles de contenu percutants puis choisis le meilleur et écris 2 accroches pour : " + input,
+            SYSTEM_BASE + "\n\nPropose 3 angles de contenu percutants puis choisis le meilleur et écris 2 accroches pour : " + (prevRaw || input),
             "ideas", input
-          ).then((a) => "<h4>1 · Angle & accroches</h4>" + mdToHtml(a)),
+          ).then((a) => ({ html: "<h4>1 · Angle & accroches</h4>" + mdToHtml(a), raw: a })),
       },
       {
         label: "Développement du post complet",
-        run: (input) =>
+        run: (input, prevRaw) =>
           askText(
-            SYSTEM_BASE + "\n\nDéveloppe un post complet (150-250 mots) percutant et structuré, basé sur ce qui précède : " + input.slice(0, 1500),
+            SYSTEM_BASE + "\n\nDéveloppe un post complet (150-250 mots) percutant et structuré, basé sur ce qui précède :\n" + (prevRaw || input).slice(0, 1500),
             "writer", input
-          ).then((a) => "<h4>2 · Post</h4>" + mdToHtml(a)),
+          ).then((a) => ({ html: "<h4>2 · Post</h4>" + mdToHtml(a), raw: a })),
       },
       {
-        label: "Visuel généré pour le post",
-        run: async (input) => {
+        label: "Visuel généré pour le post (10 à 30 s…)",
+        run: async (input, prevRaw) => {
           try {
-            const url = await AI.image("modern editorial illustration, vibrant gradient background, abstract, high quality: " + input.slice(0, 200));
-            return "<h4>3 · Visuel</h4><img src='" + url + "' alt='Visuel du post' loading='lazy' />";
+            const url = await AI.image("modern editorial illustration, vibrant gradient background, abstract, high quality: " + (prevRaw || input).slice(0, 200));
+            return {
+              html:
+                "<h4>3 · Visuel</h4><p><img src='" + esc(url) + "' alt='Visuel du post' /></p>" +
+                "<p><a href='" + esc(url) + "' target='_blank' rel='noopener'>🔗 Ouvrir le visuel en grand</a></p>",
+              raw: "Visuel généré : " + url,
+            };
           } catch {
-            return "<h4>3 · Visuel</h4><div class='result-note'>Moteur image indisponible hors-ligne — le visuel sera généré en ligne.</div>";
+            return {
+              html: "<h4>3 · Visuel</h4><div class='result-note'>Moteur image saturé — réessayez dans un instant.</div>",
+              raw: "",
+            };
           }
         },
       },
@@ -1546,27 +1599,27 @@ const CHAINS = {
     steps: [
       {
         label: "Découpage en micro-étapes",
-        run: (input) =>
+        run: (input, prevRaw) =>
           askText(
-            SYSTEM_BASE + "\n\nDécoupe cette tâche repoussée en micro-étapes de 5 à 15 minutes, ultra concrètes : " + input,
+            SYSTEM_BASE + "\n\nDécoupe cette tâche repoussée en micro-étapes de 5 à 15 minutes, ultra concrètes : " + (prevRaw || input),
             "planner", input
-          ).then((a) => "<h4>1 · Micro-étapes</h4>" + mdToHtml(a)),
+          ).then((a) => ({ html: "<h4>1 · Micro-étapes</h4>" + mdToHtml(a), raw: a })),
       },
       {
         label: "Première étape de 5 minutes",
-        run: (input) =>
+        run: (input, prevRaw) =>
           askText(
-            SYSTEM_BASE + "\n\nIdentifie LA première action de 5 minutes exactement (physique, concrète) pour démarrer, à partir de : " + input.slice(0, 1200),
+            SYSTEM_BASE + "\n\nIdentifie LA première action de 5 minutes exactement (physique, concrète) pour démarrer, à partir de :\n" + (prevRaw || input).slice(0, 1200),
             "decide", input
-          ).then((a) => "<h4>2 · L'élan</h4>" + mdToHtml(a)),
+          ).then((a) => ({ html: "<h4>2 · L'élan</h4>" + mdToHtml(a), raw: a })),
       },
       {
         label: "Message de mise en action",
-        run: (input) =>
+        run: (input, prevRaw) =>
           askText(
-            SYSTEM_BASE + "\n\nÉcris un court message de motivation direct et bienveillant (5 lignes max) pour mettre en action immédiatement, basé sur : " + input.slice(0, 1200),
+            SYSTEM_BASE + "\n\nÉcris un court message de motivation direct et bienveillant (5 lignes max) pour mettre en action immédiatement, basé sur :\n" + (prevRaw || input).slice(0, 1200),
             "writer", input
-          ).then((a) => "<h4>3 · Boost</h4>" + mdToHtml(a)),
+          ).then((a) => ({ html: "<h4>3 · Boost</h4>" + mdToHtml(a), raw: a })),
       },
     ],
     ask: "Quelle est cette tâche que vous repoussez ?",
@@ -1589,7 +1642,7 @@ document.getElementById("chaines").addEventListener("click", async (e) => {
   await runSteps(
     chain.steps.map((s) => ({
       label: s.label,
-      run: (acc) => s.run(acc ? acc + "\n\nContexte: " + input : input),
+      run: (prev) => s.run(input, prev.raw),
     }))
   );
 
@@ -1599,5 +1652,5 @@ document.getElementById("chaines").addEventListener("click", async (e) => {
 });
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a48e4bd63c610062',t:'MTc5MTcyNjIzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a48e6a289b7fbb84',t:'MTc5MTcyNzQ3NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
